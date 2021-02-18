@@ -38,8 +38,8 @@ alignR_server <- function(input, output, session) {
   ## Create base Specimen Plot in rglWidget object
   MeshData <- reactive({
 
-    # spec <-  get(sp_list[1], envir = .GlobalEnv)
-    spec <- #surface object
+    spec <-  get('sp_list', envir = .GlobalEnv)[[1]]
+    # spec <- #surface object
     ptsize <- 1
     center <- TRUE
 
@@ -103,7 +103,9 @@ alignR_server <- function(input, output, session) {
       points3d(specimen[keep, 1], specimen[keep, 2], specimen[keep,3],
                size = 10, color = "red", add = TRUE)
 
-      saveLMs(input$n, current_lm, keep)
+      LM_coords <- c(specimen[keep, 1], specimen[keep, 2], specimen[keep,3])
+
+      saveLMs(input$n, current_lm, LM_coords)
 
       output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {
         loadLMs()
