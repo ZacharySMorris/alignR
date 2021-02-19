@@ -27,7 +27,14 @@ alignR_server <- function(input, output, session) {
   })
   ##
 
-  cur_spec <- reactiveVal(1)
+  # cur_spec <- get('cur_spec', envir = .GlobalEnv) #not sure if this should be specified outside the shinyApp first and then called or set inside the server
+  cur_sp <- reactiveVal(1)
+  sp_list <- get('sp_list', envir = .GlobalEnv)
+  sp_n <- length(sp_list)
+
+  output$cur_specimen <- renderUI({
+    numericInput("cur_specimen","specimen #", cur_sp())
+  })
 
   #need to create an input that is the initial specimen value
   # should use a hidden ui or reactiveValue?
@@ -38,7 +45,7 @@ alignR_server <- function(input, output, session) {
   ## Create base Specimen Plot in rglWidget object
   MeshData <- reactive({
 
-    spec <-  get('sp_list', envir = .GlobalEnv)[[1]]
+    spec <-  sp_list[[cur_sp()]]
     # spec <- #surface object
     ptsize <- 1
     center <- TRUE
@@ -132,33 +139,73 @@ alignR_server <- function(input, output, session) {
 
   })
 
-  observeEvent(input$tab_n, {
-    if (input$tab_n==1){
-      output$SpecimenPlot1 <- renderRglwidget({
-        rgl.bg(color = "SlateGray")
-        rglwidget(MeshData()) })
-    }
-
-    if (input$tab_n==2){
-      output$SpecimenPlot2 <- renderRglwidget({
-        rgl.bg(color = "SlateGray")
-        rglwidget(MeshData()) })
-    }
-
-    if (input$tab_n==3){
+  # observeEvent(input$tab_n, {
+  #   if (input$tab_n==1){
+  #     output$SpecimenPlot1 <- renderRglwidget({
+  #       rgl.bg(color = "SlateGray")
+  #       rglwidget(MeshData()) })
+  #   }
+  #
+  #   if (input$tab_n==2){
+  #     output$SpecimenPlot2 <- renderRglwidget({
+  #       rgl.bg(color = "SlateGray")
+  #       rglwidget(MeshData()) })
+  #   }
+  #
+  #   if (input$tab_n==3){
       output$SpecimenPlot3 <- renderRglwidget({
         rgl.bg(color = "SlateGray")
         rglwidget(MeshData()) })
+  #   }
+  # })
+
+  observeEvent(input$Next_Sp,{
+    if (!is.null(landmarks)) {
+
+      # shinyalert(
+      #   title = "Hello",
+      #   text = "This is a modal",
+      #   size = "s",
+      #   closeOnEsc = TRUE,
+      #   closeOnClickOutside = FALSE,
+      #   html = FALSE,
+      #   type = "success",
+      #   showConfirmButton = TRUE,
+      #   showCancelButton = TRUE,
+      #   confirmButtonText = "OK",
+      #   confirmButtonCol = "#AEDEF4",
+      #   cancelButtonText = "Cancel",
+      #   timer = 0,
+      #   imageUrl = "",
+      #   animation = TRUE,
+      #   callbackR = function(x) {
+      #     if(x){
+      #       write.lms(landmarks,cur_sp())
+      #       clearLMs(input$n)
+      #     }
+      #   }
+      # )
+
+      write.lms(landmarks,cur_sp())
+      clearLMs(input$n)
+      next_spec <- next.sp(cur_sp(),sp_n)
+      cur_sp(next_spec)
+    } else{
+      next_spec <- next.sp(cur_sp(),sp_n)
+      cur_sp(next_spec)
     }
   })
 
-  observeEvent(input$Next_Sp,{
-
-    write.csv(landmarks,file="landmarkingTEST.csv") #this writes it to a csv, which will be the ultimate condition
-    ##should replace with something that it saves it to a data.frame with a specimen ID
-    clearLMs(input$n)
-    # clear3d()
-    # MeshData()
+  observeEvent(input$Last_Sp,{
+    if (!is.null(landmarks)) {
+      write.lms(landmarks,cur_sp())
+      clearLMs(input$n)
+      next_spec <- prev.sp(cur_sp(),sp_n)
+      cur_sp(next_spec)
+    } else{
+      next_spec <- prev.sp(cur_sp(),sp_n)
+      cur_sp(next_spec)
+    }
   })
 
   observeEvent(input$Next_LM_1,{

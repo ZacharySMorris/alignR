@@ -48,6 +48,8 @@ alignR <- function(file_dir,loadAll=TRUE){
     # # Save the object as a reactive value
     # values <- reactiveValues(x = val)
 
+    cur_spec <- reactiveVal(1)
+
     shinyApp(alignR_ui, alignR_server)
     # lm_list <- runApp("alignR_all")
 

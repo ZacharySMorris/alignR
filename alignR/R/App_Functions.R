@@ -21,6 +21,37 @@ clearLMs <- function(x){
   }
 }
 
+next.sp <- function(x,n){
+  if (x < n){
+    next_spec <- x + 1
+    return(next_spec)
+  }else{
+    return(1)
+  }
+}
+
+prev.sp <- function(x,n){
+  if (x > 1){
+    next_spec <- x - 1
+    return(next_spec)
+  }else{
+    return(n)
+  }
+}
+
+write.lms <- function (landmarks,x){
+    tmp <- paste("landmarks_", x, ".csv", sep="")
+    write.csv(landmarks,file=tmp) #this writes it to a csv, which will be the ultimate condition
+    ##should replace with something that it saves it to a data.frame with a specimen ID
+}
+
+
+###make a function to load in and make basic rgl window
+
+
+###make a function that adds landmark points and updates rgl window
+
+
 
 rgl.landmarking <- function(x, temp_scene, specimen) {
   current_lm <- as.numeric(x)

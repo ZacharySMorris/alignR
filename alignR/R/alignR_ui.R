@@ -2,6 +2,7 @@
 
 alignR_ui <- fluidPage(
   useShinyjs(),
+  useShinyalert(),
   navbarPage("landmark alignR",
              id = "tab_n",
              tabPanel("Discrete Landmark Analysis", value = 1),
@@ -40,7 +41,7 @@ alignR_ui <- fluidPage(
                           # registerSceneChange(),
                           # conditionalPanel(condition="input.tabselected==1",
                           rglwidgetOutput("SpecimenPlot3", width = "512px", height = "512px"),
-                          uiOutput("keep_title"),
+                          uiOutput("cur_specimen"),
                           actionButton("Last_Sp", "Previous specimen", icon = icon("arrow-alt-circle-left"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray"),
                           actionButton("Next_Sp", "Next specimen", icon = icon("arrow-alt-circle-right"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray"),
                           # width = 8,
