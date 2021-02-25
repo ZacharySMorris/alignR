@@ -38,6 +38,12 @@ alignR_ui <- fluidPage(
                           setBackgroundColor(color = "SlateGray"),
                           # Output: Histogram ----
                           uiOutput("LM_n_title"),
+
+                          #testing click extraction, replace with more specific calls when working
+                          uiOutput("plot_3D_mousemode"),
+                          verbatimTextOutput("brush_info_3D"),
+                          #end of ui code for testing click extraction
+
                           # registerSceneChange(),
                           # conditionalPanel(condition="input.tabselected==1",
                           rglwidgetOutput("SpecimenPlot3", width = "512px", height = "512px"),

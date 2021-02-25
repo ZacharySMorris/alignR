@@ -23,6 +23,7 @@ sp_list[[5]] <- scallopPLY$ply
 #Need to change the server code to identify the surface object (line 41)
 shinyApp(alignR_ui, alignR_server)
 
+## currently recieve this error "getObj id is undefined" when selecting a point ##
 
 #This will be the ultimate wrapper for the function, which takes a file directory and then passes the list of objects to the app
 #Doesn't work just yet
