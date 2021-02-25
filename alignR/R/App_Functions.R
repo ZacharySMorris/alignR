@@ -63,3 +63,48 @@ rgl.landmarking <- function(x, temp_scene, specimen) {
 
   return(keep)
 }
+
+
+llx <- 0.4531250
+lly <- 0.4415616
+
+rgl.convertLandmark3d <- function (proj, region = proj$region) {
+  llx <- region[1]
+  lly <- region[2]
+  urx <- llx + 0.05
+  ury <- lly + 0.05
+  if (llx > urx) {
+    temp <- llx
+    llx <- urx
+    urx <- temp
+  }
+  if (lly > ury) {
+    temp <- lly
+    lly <- ury
+    ury <- temp
+  }
+  proj$view["x"] <- proj$view["y"] <- 0
+  function(x, y = NULL, z = NULL) {
+    pixel <- rgl.user2window(x, y, z, projection = proj)
+    x <- pixel[, 1]
+    y <- pixel[, 2]
+    z <- pixel[, 3]
+    (llx <= x) & (x <= urx) & (lly <= y) & (y <= ury) & (0 <=
+                                                           z) & (z <= 1)
+  }
+}
+
+
+rgl.convertLandmark3d <- function (proj, region = proj$region) {
+  rgl_x <- region[1]
+  rgl_y <- region[2]
+
+  proj$view["x"] <- proj$view["y"] <- 0
+  function(x, y = NULL, z = NULL) {
+    pixel <- rgl.user2window(x, y, z, projection = proj)
+    x <- pixel[, 1]
+    y <- pixel[, 2]
+    z <- pixel[, 3]
+    (x <= rgl_x <= x) & (y <= rgl_y <= y) & (0 <= z) & (z <= 1)
+  }
+}

@@ -46,6 +46,7 @@ alignR_server <- function(input, output, session) {
   MeshData <- reactive({
 
     spec <-  sp_list[[cur_sp()]]
+    spec <- scallopPLY$ply
     # spec <- #surface object
     ptsize <- 1
     center <- TRUE
