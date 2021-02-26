@@ -130,10 +130,22 @@ server <- function(input, output, session) {
 
   output$selected <- renderPrint({
     if(length(input$rgl_3D_brush) == 0 || input$rgl_3D_brush$state == "inactive") return(NULL)
-    cat("Selections from function:\n")
+    cat("Selections from crosstalk:\n")
+    print(which(as.logical(sharedData$selection())))
 
-    f <- rgl.convertLandmark3d(input$rgl_3D_brush)
-    which(f(iris[, c(input$plot_x, input$plot_y, input$plot_z)]))
+    cat("Selections from rgl.window2user:\n")
+    selected_LM()
+    # rgl.user2window(input$rgl_3D_brush$region[1],y=input$rgl_3D_brush$region[2], input$rgl_3D_brush$proj)
+  })
+
+  selected_LM <- reactive({
+    tmp_coords <- rgl.window2user(input$rgl_3D_brush$region[1],input$rgl_3D_brush$region[2], input$rgl_3D_brush$proj)
+
+    tmp_coords <- apply(tmp_coords,2,getmode) #taking the modal values...not correct, but gets a single point
+
+    # points3d(tmp_coords[, 1], tmp_coords[, 2], tmp_coords[,3],
+    #          size = 10, color = "red", add = TRUE)
+    return(tmp_coords)
   })
 
 
@@ -176,110 +188,109 @@ server <- function(input, output, session) {
     return(scene1)
   })
 
-  # MeshData <- reactive({
-  #
-  #   spec <-  sp_list[[1]]
-  #   # spec <- #surface object
-  #   ptsize <- 1
-  #   center <- TRUE
-  #
-  #   spec.name <- deparse(substitute(spec))
-  #   mesh <- NULL
-  #   if (inherits(spec, "shape3d") == TRUE || inherits(spec, "mesh3d") ==
-  #       TRUE) {
-  #     if (center == TRUE) {
-  #       specimen <- scale(as.matrix(t(spec$vb)[, -4]), scale = FALSE)
-  #       spec$vb <- rbind(t(specimen), 1)
-  #     }
-  #     if (center == FALSE) {
-  #       specimen <- as.matrix(t(spec$vb)[, -4])
-  #     }
-  #     mesh <- spec
-  #     if (is.null(mesh$material))
-  #       mesh$material$color <- "gray"
-  #     if (is.null(mesh$material$color))
-  #       mesh$material$color <- "gray"
-  #   }
-  #   else if (inherits(spec, "matrix") == FALSE) {
-  #     stop("File is not a shape3d/mesh3d object or xyz matrix")
-  #   }
-  #   else if (inherits(spec, "matrix") == TRUE && dim(spec)[2] ==
-  #            3) {
-  #     if (center == TRUE) {
-  #       specimen <- scale(spec, scale = FALSE)
-  #     }
-  #     if (center == FALSE) {
-  #       specimen <- spec
-  #     }
-  #   }
-  #   else {
-  #     stop("File is not matrix in form: vertices by xyz")
-  #   }
-  #
-  #   clear3d()
-  #   # rgl.open(useNULL =T) #this is something to help with not plotting separate rgl window, but it doesn't work yet...
-  #   ids <- plot3d(specimen[, 1], specimen[, 2], specimen[, 3], size = ptsize,
-  #                 aspect = FALSE, box = FALSE, axes = FALSE,
-  #                 xlab = "",  ylab = "",  zlab = "")
-  #
-  #   sharedData <<- rglShared(ids["data"])
-  #
-  #   if (!is.null(mesh)) {
-  #     shade3d(mesh, meshColor = "legacy", add = TRUE)
-  #   }
-  #
-  #   temp_scene <- scene3d(minimal = FALSE)
-  #
-  #   observeEvent(input$goLM, {
-  #
-  #     LM_ids <- temp_scene[["objects"]][[1]]["id"]
-  #
-  #     keep <- ans <- NULL
-  #     keep <- selectpoints3d(LM_ids, value = FALSE, button = "left")[2]
-  #
-  #     # keep <- ans <- NULL
-  #     # keep <- rgl.landmarking(1, temp_scene, specimen)
-  #     #
-  #     # points3d(specimen[keep, 1], specimen[keep, 2], specimen[keep,3],
-  #     #          size = 10, color = "red", add = TRUE)
-  #     #
-  #     LM_coords <- c(specimen[keep, 1], specimen[keep, 2], specimen[keep,3])
-  #
-  #     output$landmarking <- renderPrint(LM_coords)
-  #
-  #   })
-  #
-  #   scene1 <- scene3d(minimal = FALSE)
-  #
-  #   # rgl.close()
-  #   return(scene1)
-  #
-  # })
+  MeshData <- reactive({
+
+    spec <-  sp_list[[1]]
+    # spec <- #surface object
+    ptsize <- 1
+    center <- TRUE
+
+    spec.name <- deparse(substitute(spec))
+    mesh <- NULL
+    if (inherits(spec, "shape3d") == TRUE || inherits(spec, "mesh3d") ==
+        TRUE) {
+      if (center == TRUE) {
+        specimen <- scale(as.matrix(t(spec$vb)[, -4]), scale = FALSE)
+        spec$vb <- rbind(t(specimen), 1)
+      }
+      if (center == FALSE) {
+        specimen <- as.matrix(t(spec$vb)[, -4])
+      }
+      mesh <- spec
+      if (is.null(mesh$material))
+        mesh$material$color <- "gray"
+      if (is.null(mesh$material$color))
+        mesh$material$color <- "gray"
+    }
+    else if (inherits(spec, "matrix") == FALSE) {
+      stop("File is not a shape3d/mesh3d object or xyz matrix")
+    }
+    else if (inherits(spec, "matrix") == TRUE && dim(spec)[2] ==
+             3) {
+      if (center == TRUE) {
+        specimen <- scale(spec, scale = FALSE)
+      }
+      if (center == FALSE) {
+        specimen <- spec
+      }
+    }
+    else {
+      stop("File is not matrix in form: vertices by xyz")
+    }
+
+    clear3d()
+    # rgl.open(useNULL =T) #this is something to help with not plotting separate rgl window, but it doesn't work yet...
+    ids <- plot3d(specimen[, 1], specimen[, 2], specimen[, 3], size = ptsize,
+                  aspect = FALSE, box = FALSE, axes = FALSE,
+                  xlab = "",  ylab = "",  zlab = "")
+
+    sharedData <<- rglShared(ids["data"])
+
+    if (!is.null(mesh)) {
+      shade3d(mesh, meshColor = "legacy", add = TRUE)
+    }
+
+    temp_scene <- scene3d(minimal = FALSE)
+
+    # observeEvent(input$goLM, {
+    #
+    #   LM_ids <- temp_scene[["objects"]][[1]]["id"]
+    #
+    #   keep <- ans <- NULL
+    #   keep <- selectpoints3d(LM_ids, value = FALSE, button = "left")[2]
+    #
+    #   # keep <- ans <- NULL
+    #   # keep <- rgl.landmarking(1, temp_scene, specimen)
+    #   #
+    #   # points3d(specimen[keep, 1], specimen[keep, 2], specimen[keep,3],
+    #   #          size = 10, color = "red", add = TRUE)
+    #   #
+    #   LM_coords <- c(specimen[keep, 1], specimen[keep, 2], specimen[keep,3])
+    #
+    #   output$landmarking <- renderPrint(LM_coords)
+    #
+    # })
+
+    scene1 <- scene3d(minimal = FALSE)
+
+    # rgl.close()
+    return(scene1)
+
+  })
 
 
   output$plot_3D <- renderRglwidget({
     rgl.bg(color = "SlateGray")
-    rglwidget(PlotTemp(),
+    rglwidget(MeshData(),
               shared = sharedData,
               shinyBrush = "rgl_3D_brush") ## need to add shared and shinyBrush calls into the rglwidget
   })
 
-  # observeEvent(input$goLM, {
-  #       LM_ids <- PlotTemp()[["objects"]][[1]]["id"]
-  #
-  #       keep <- ans <- NULL
-  #       keep <- selectpoints3d(LM_ids, value = FALSE, button = "left")[2]
-  #
-  #       # keep <- ans <- NULL
-  #       # keep <- rgl.landmarking(1, temp_scene, specimen)
-  #       #
-  #       # points3d(specimen[keep, 1], specimen[keep, 2], specimen[keep,3],
-  #       #          size = 10, color = "red", add = TRUE)
-  #       #
-  #       LM_coords <- c(specimen[keep, 1], specimen[keep, 2], specimen[keep,3])
-  #
-  #       output$landmarking <- renderPrint(LM_coords)
-  #     })
+  observeEvent(input$goLM, {
+
+    tmp_LMs <- selected_LM()
+
+    output$plot_3D <- renderRglwidget({
+      MeshData()
+      rgl.spheres(tmp_LMs[1], tmp_LMs[2], tmp_LMs[3],
+              radius = 0.5, color = "red", add = TRUE)
+
+      rglwidget(scene3d(minimal = FALSE),
+                shared = sharedData,
+                shinyBrush = "rgl_3D_brush")
+    })
+
+      })
 }
 
 shinyApp(ui, server)

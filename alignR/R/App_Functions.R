@@ -64,9 +64,10 @@ rgl.landmarking <- function(x, temp_scene, specimen) {
   return(keep)
 }
 
-
-llx <- 0.4531250
-lly <- 0.4415616
+getmode <- function(v) {
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
 
 rgl.convertLandmark3d <- function (proj, region = proj$region) {
   llx <- region[1]
