@@ -6,7 +6,11 @@ library(shinyWidgets)
 library(shinyFiles)
 library(shinyjs)
 library(shinyalert)
+library(shinyBS)
+library(shinyFeedback)
+library(fontawesome)
 library(Rvcg)
+library(Morpho)
 
 sp_list <- list()
 data("scallopPLY")
@@ -29,3 +33,9 @@ shinyApp(alignR_ui, alignR_server)
 #Doesn't work just yet
 alignR(file_dir = ,
        loadAll = TRUE)
+
+vert2points(scallopPLY$ply)
+apply(vert2points(scallopPLY$ply),2,mean)
+
+specimen <- scale(as.matrix(t(scallopPLY$ply$vb)[, -4]), scale = FALSE)
+spec$vb <- rbind(t(specimen), 1)

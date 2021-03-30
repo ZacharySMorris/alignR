@@ -1,5 +1,10 @@
 alignR_server <- function(input, output, session) {
 
+  # hide(list("SpecimenPlot2", "SpecimenPlot3"))
+
+  sharedData <- NULL
+  verts <- NULL
+
   ## Update the landmark selection menu based on the total number of landmarks selected in Lm_n
   reactive({
     if (input$tab_n==3){
@@ -32,8 +37,8 @@ alignR_server <- function(input, output, session) {
   sp_list <- get('sp_list', envir = .GlobalEnv)
   sp_n <- length(sp_list)
 
-  output$cur_specimen <- renderUI({
-    numericInput("cur_specimen","specimen #", cur_sp())
+  output$cur_specimen <- renderPrint({
+    cat("Specimen #", cur_sp(), sep="")
   })
 
   #need to create an input that is the initial specimen value
@@ -42,11 +47,13 @@ alignR_server <- function(input, output, session) {
   #   spec_list <- sp_list
   # }
 
+  open3d(useNULL = TRUE)
+
   ## Create base Specimen Plot in rglWidget object
   MeshData <- reactive({
 
     spec <-  sp_list[[cur_sp()]]
-    spec <- scallopPLY$ply
+    # spec <- scallopPLY$ply
     # spec <- #surface object
     ptsize <- 1
     center <- TRUE
@@ -98,40 +105,8 @@ alignR_server <- function(input, output, session) {
 
     temp_scene <- scene3d(minimal = FALSE)
 
-    observeEvent(input$goLM, {
-      current_lm <- input$Lm_n
-
-      output$LM_n_title <- renderUI({
-        titlePanel(paste("Select landmark ", current_lm, sep = ""))
-      })
-
-      keep <- ans <- NULL
-      keep <- rgl.landmarking(current_lm, temp_scene, specimen)
-
-      points3d(specimen[keep, 1], specimen[keep, 2], specimen[keep,3],
-               size = 10, color = "red", add = TRUE)
-
-      LM_coords <- c(specimen[keep, 1], specimen[keep, 2], specimen[keep,3])
-
-      saveLMs(input$n, current_lm, LM_coords)
-
-      output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {
-        loadLMs()
-      })
-
-      next_lm <- as.numeric(current_lm) + 1
-      updateSelectInput(session, "Lm_n", selected = next_lm)
-
-      if (next_lm > as.numeric(current_lm)){
-        output$LM_n_title <- renderUI({
-          titlePanel(paste("Landmark ", next_lm, " accepted", sep = ""))
-        })
-      }
-
-      # scene1 <- scene3d(minimal = FALSE)
-      # return(scene1)
-
-    })
+    mesh_obj <- temp_scene[["objects"]][[1]]["id"]
+    verts <<- rgl.attrib(mesh_obj, "vertices")
 
     scene1 <- scene3d(minimal = FALSE)
 
@@ -156,9 +131,69 @@ alignR_server <- function(input, output, session) {
   #   if (input$tab_n==3){
       output$SpecimenPlot3 <- renderRglwidget({
         rgl.bg(color = "SlateGray")
-        rglwidget(MeshData()) })
+        rglwidget(MeshData(),
+                  shared = sharedData,
+                  shinyBrush = "rgl_3D_brush") ## need to add shared and shinyBrush calls into the rglwidget
+      })
   #   }
   # })
+
+      output$plot_3D_mousemode <-
+        renderUI({
+          rglMouse( default = "trackball",
+                    stayActive = FALSE,
+                    button = 1,
+                    choices = c("trackball", "selecting"),
+                    sceneId = "SpecimenPlot3",
+                    style = "background-color:SlateGray;border-color:SlateGray;color:#fff")
+        })
+
+      selected_LM <- reactive({
+        tmp_coords <- shinySelectPoints3d(verts, input$par3d, input$rgl_3D_brush)
+        return(tmp_coords)
+      })
+
+      centroid <- reactive({
+        tmp_center <- rgl.user2window(c(4.415091, -48.092817, 23.688965), input$rgl_3D_brush$proj)
+        return(tmp_center)
+      })
+
+      observeEvent(input$getPar, {
+        shinyGetPar3d(c("modelMatrix","projMatrix", "viewport", "userMatrix","userProjection"), session)
+      })
+
+      observeEvent(input$goLM, {
+        click("getPar")
+        updateSelectInput(session, "plot_3D_mousemode", selected = "selecting")
+
+        tmp_LMs <- selected_LM()
+        tmp_center <- centroid()
+
+        # output$plot_3D <- renderRglwidget({
+        #   rgl.spheres(tmp_LMs[,1], tmp_LMs[,2], tmp_LMs[,3],
+        #               radius = 0.5, color = c("red","blue","green"), add = TRUE)
+        #
+        #   rgl.spheres(tmp_center[1], tmp_center[2], tmp_center[3],
+        #               radius = 0.5, color = "purple", add = TRUE)
+        #
+        #   # line_to_centroid <- lines3d(rbind(tmp_LMs,tmp_center), color = "yellow", add = TRUE)
+        #   arrow_to_centroid <- arrow3d(p0=c(tmp_LMs),p1=c(tmp_center),color="green",plot=TRUE)
+        #
+        #   # output$landmarking <- renderPrint({
+        #   # print(arrow_to_centroid)
+        #   # })
+        #
+        #   ## works to add selected points, but changes the center based on position of landmarks
+        #   ## should be less of an issue when landmarks are correctly on the mesh
+        #   ## but is there a way to ensure the center is maintained?
+        #
+        #   rglwidget(scene3d(minimal = FALSE),
+        #             shared = sharedData,
+        #             shinyBrush = "rgl_3D_brush")
+        # })
+
+      })
+
 
   observeEvent(input$Next_Sp,{
     if (!is.null(landmarks)) {
@@ -229,4 +264,46 @@ alignR_server <- function(input, output, session) {
     click("goLM")
   })
 }
+
+
+
+
+
+
+
+# observeEvent(input$goLM, {
+#   current_lm <- input$Lm_n
+#
+#   output$LM_n_title <- renderUI({
+#     titlePanel(paste("Select landmark ", current_lm, sep = ""))
+#   })
+#
+#   keep <- ans <- NULL
+#   keep <- rgl.landmarking(current_lm, temp_scene, specimen)
+#
+#   points3d(specimen[keep, 1], specimen[keep, 2], specimen[keep,3],
+#            size = 10, color = "red", add = TRUE)
+#
+#   LM_coords <- c(specimen[keep, 1], specimen[keep, 2], specimen[keep,3])
+#
+#   saveLMs(input$n, current_lm, LM_coords)
+#
+#   output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {
+#     loadLMs()
+#   })
+#
+#   next_lm <- as.numeric(current_lm) + 1
+#   updateSelectInput(session, "Lm_n", selected = next_lm)
+#
+#   if (next_lm > as.numeric(current_lm)){
+#     output$LM_n_title <- renderUI({
+#       titlePanel(paste("Landmark ", next_lm, " accepted", sep = ""))
+#     })
+#   }
+#
+#   # scene1 <- scene3d(minimal = FALSE)
+#   # return(scene1)
+#
+# })
+
 
