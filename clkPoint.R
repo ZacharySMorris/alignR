@@ -14,19 +14,13 @@ ptdist <- function(X,Y){
 }
 
 
-
-clkPoint <- function(plot = T){
+clkWindow <- function(){
   
   rect <- rgl.select(button = "left", dev = cur3d(), subscene = currentSubscene3d())
-  dev = cur3d()
-  subscene = currentSubscene3d()
   
-  clkprj <- rgl.projection(dev = dev,
-                           subscene = subscene)
+  clkprj <- rgl.projection(dev = cur3d(),
+                           subscene = currentSubscene3d())
   
-  ids = ids3d("shapes")
-  tri <- rgl.attrib(id = ids[which(ids[,2]=="triangles"),1], attrib = "vertices")
-  trictrs <- rgl.attrib(id = ids[which(ids[,2]=="triangles"),1], attrib = "centers")
   wintrictrs <- rgl.user2window(trictrs, projection = clkprj)
   wintri <- rgl.user2window(tri, projection = clkprj)
   
@@ -39,11 +33,37 @@ clkPoint <- function(plot = T){
                      },
                      dev, subscene)
   )
-  ntri <- 50
-  pt2ctrdists <- ptdist(X = winvect[1,], Y =  wintrictrs) # calculate window XY and Z distances
-  XYdistindex <- order(pt2ctrdists[,4], decreasing = F)[1:ntri] # get closest centers sorted by window XY distance
   
-  tri.i <- seq(1, nrow(tri),by = 3 )[XYdistindex] # make a dummy triangle index
+  
+  
+}
+
+
+clkPoint <- function(plot = T){
+  
+  rect <- rgl.select(button = "left", dev = cur3d(), subscene = currentSubscene3d())
+  
+  clkprj <- rgl.projection(dev = cur3d(),
+                           subscene = currentSubscene3d())
+  
+  wintrictrs <- rgl.user2window(trictrs, projection = clkprj)
+  wintri <- rgl.user2window(tri, projection = clkprj)
+  
+  winvect <- cbind(matrix(rect,ncol = 2, byrow = T), c(0,1))
+  objvect <- t(apply(winvect, MARGIN= 1,
+                     FUN = function(X,...){ rgl.window2user(x=X[1],
+                                                            y=X[2],
+                                                            z=X[3],
+                                                            projection = clkprj)
+                     },
+                     dev, subscene)
+  )
+  
+  
+  # pt2ctrdists <- ptdist(X = winvect[1,], Y =  wintrictrs) # calculate window XY and Z distances
+  # XYdistindex <- order(pt2ctrdists[,4], decreasing = F)[1:50] # get closest centers sorted by window XY distance
+  # 
+  tri.i <- seq(1, nrow(tri),by = 3 ) # make a dummy triangle index
   verts <- as.vector(sapply(tri.i, FUN = function(X,Y) X + c(0:2))) # triangle vertex index
   
   wintriA <- wintri[verts,]
@@ -82,13 +102,9 @@ clkPoint <- function(plot = T){
   
   t = (0 - a[3])/ (b[3] - a[3]) 
   
-  
   ptcoords <- a+unlist(lapply((b-a), FUN = function(X,Y) Y*X, Y=t))
-  
-  polygon(decomptri$x)
-  points(ptcoords)
-  
   clkpt <- (as.matrix(ptcoords) %*% t(decomptri$rotation) ) + decomptri$center
+  
   if(plot){
     points3d(clkpt, col = "green", size = 10)
   }
