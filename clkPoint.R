@@ -50,14 +50,7 @@ clkPoint <- function(plot = T){
   wintri <- rgl.user2window(tri, projection = clkprj)
   
   winvect <- cbind(matrix(rect,ncol = 2, byrow = T), c(0,1))
-  objvect <- t(apply(winvect, MARGIN= 1,
-                     FUN = function(X,...){ rgl.window2user(x=X[1],
-                                                            y=X[2],
-                                                            z=X[3],
-                                                            projection = clkprj)
-                     },
-                     dev, subscene)
-  )
+  objvect <- rgl.window2user(winvect, projection = clkprj)
   
   
   # pt2ctrdists <- ptdist(X = winvect[1,], Y =  wintrictrs) # calculate window XY and Z distances
