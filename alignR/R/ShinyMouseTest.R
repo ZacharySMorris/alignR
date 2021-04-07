@@ -127,12 +127,27 @@ tags$div("class='sweet-overlay' tabindex='-1' style='opacity:0.00;display:active
 
 fa_i("question-circle")
 HTML("Next <br/> landmark")
+alpha("SlateGray", 0.9)
+alpha("SteelBlue", 0.9)
+alpha("#648f7b", 0.9)
+alpha("#c55347", 0.9)
+
+muted("SlateGray",c=0)
+# outline-color
 
 ui <- fluidPage(
   useShinyjs(),
   useShinyFeedback(),
   tags$head(tags$style("#toast-container .toast {width:350px;}
                        #toast-container .toast-warning {background-color:#c55347;color:#fff;}
+                       #Lm_n .selectize-input.full {background-color:#c55347;border-color:#c55347;outline-color:#b04a3c;color:#fff;}
+                       #Lm_n .selectize-control.single .selectize-input:after {border-color:#fff transparent transparent transparent}
+                       #Lm_n .selectize-control.single .selectize-input.dropdown-active:after {border-color:transparent transparent #fff transparent}
+                       #Lm_n .selectize-dropdown {background-color:#C55347E6;color:#fff;}
+                       #Lm_n .selectize-dropdown-content .active {background-color:#b04a3c;color:#fff;}
+                       #plot_3D_mousemode select {border:0px;outline:0px;background-color:SlateGray;color:#fff;}
+                       #plot_3D_mousemode select option {border:0px;outline:0px;background-color:#708090E6;border-color:#708090E6;outline-color:#708090E6;color:#fff;}
+                       #plot_3D_mousemode select option:hover {background-color:#6F7881;color:#fff;}
                        ")
             # tags$script("# Shiny.addCustomMessageHandler('selectingMouse', function(selecting){
             #        setMouseMode(selecting)
@@ -143,10 +158,7 @@ ui <- fluidPage(
   sidebarLayout(
     mainPanel(setBackgroundColor(color = "SlateGray"),
               rglwidgetOutput("plot_3D"),
-              fluidRow(
-                h5("Mouse Mode:", style = "padding-left:20px; color:#fff"),
-                uiOutput("plot_3D_mousemode")
-              )
+              uiOutput("plot_3D_mousemode")
     ),
     sidebarPanel(style = "background-color:#c55347;border-color:#c55347;color:#fff",
                  hidden(numericInput("n", "Number of fixed landmarks", 6)),
@@ -196,16 +208,28 @@ server <- function(input, output, session) {
   })
 
   output$Lm_n <- renderUI({
-    selectInput("Lm_n","Landmark to digitize", LM_values())
+    tagList(
+      fluidRow(
+        h5("Landmark to digitize"),
+        align = "center",
+        ),
+      selectInput("Lm_n",NULL, LM_values())
+            )
   })
 
   output$plot_3D_mousemode <- renderUI({
-      rglMouse("plot_3D",
-               default = "trackball",
-               choices = c("trackball", "selecting"),
-               labels = c("rotation", "landmarking"),
-               stayActive = FALSE,
-               style = "background-color:SlateGray;border-color:SlateGray;color:#fff")
+    tagList(
+      div(style="display:inline-block;", h5("Mouse Mode:", style = "padding-left:20px; color:#fff")),
+      div(style="display:inline-block",
+        rglMouse("plot_3D",
+                 default = "trackball",
+                 choices = c("trackball", "selecting"),
+                 labels = c("rotation", "landmarking"),
+                 stayActive = FALSE,
+                 # style = "outline-color:SlateGray;background-color:SlateGray;border-color:SlateGray;color:#fff"
+                 )
+        )
+      )
     })
 
   open3d(useNULL = TRUE)
@@ -251,7 +275,15 @@ server <- function(input, output, session) {
   # input$plot_3D_mousemode
 
   observeEvent(input$goLM, {
-    session$sendCustomMessage("selectingMouse", 'value = "selecting"')
+    HTML(
+      "document.getElementById(this.attributes.rglSceneId.value).rglinstance.
+      setMouseMode('selecting',
+             button = parseInt(this.attributes.rglButton.value),
+             subscene = parseInt(this.attributes.rglSubscene.value),
+             stayActive = parseInt(this.attributes.rglStayActive.value))"
+    )
+
+    # session$sendCustomMessage("selectingMouse", 'value = "selecting"')
 
     # session$sendCustomMessage("selectingMouse",
     #                           list(subscene = currentSubscene3d(cur3d()),
@@ -293,12 +325,6 @@ server <- function(input, output, session) {
                 shared = sharedData,
                 shinyBrush = "rgl_3D_brush")
     })
-
-    # show_toast(title = "Is this landmark correctly placed?",
-    #            text = "Click confirm or select again.",
-    #            type = "question",
-    #            timer = 10000,
-    #            position = "top-end")
 
     if (isolate(input$NoWarnings) == FALSE){
       showToast(type = "warning",
@@ -353,8 +379,15 @@ runGadget(shinyApp(ui, server), viewer = vwr)  # Run app in presized window
 
 shinyApp(ui, server)
 
-
-
+### this is the html that runs on a change in the rglMouse valuse
+HTML(
+"document.getElementById(this.attributes.rglSceneId.value).rglinstance.
+setMouseMode('selecting',
+             button = parseInt(this.attributes.rglButton.value),
+             subscene = parseInt(this.attributes.rglSubscene.value),
+             stayActive = parseInt(this.attributes.rglStayActive.value))"
+)
+###
 
 #######
 

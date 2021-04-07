@@ -13,14 +13,12 @@ library(Rvcg)
 library(Morpho)
 
 sp_list <- list()
-data("scallopPLY")
-scallopPLY
-sp_list[[1]] <- scallopPLY$ply
-sp_list[[2]] <- vcgImport(dir(file_dir, full.names = TRUE))
-sp_list[[2]] <- scallopPLY$ply
-sp_list[[3]] <- scallopPLY$ply
-sp_list[[4]] <- scallopPLY$ply
-sp_list[[5]] <- scallopPLY$ply
+spec.fl <- list.files("~/Dropbox/alignR/alignR/data/turts/input/", pattern = ".off")
+
+for (i in c(1:5)){
+  sp_list[[i]] <- vcgImport(file.path("~/Dropbox/alignR/alignR/data/turts/input/",spec.fl[i]))
+}
+
 
 
 #This will run the app, once the ui and server objects are stored in memory

@@ -3,11 +3,12 @@ require(rgl)
 require(Rvcg)
 
 spec.fl <- list.files("./alignR/data/turts/input/", pattern = ".off")
+spec.fl <- list.files("~/Dropbox/alignR/alignR/data/turts/input/", pattern = ".off")
 
 i=1
 
-
 mesh <- vcgImport(file.path("./alignR/data/turts/input/",spec.fl[i]))
+mesh <- vcgImport(file.path("~/Dropbox/alignR/alignR/data/turts/input/",spec.fl[i]))
 
 tri <- t(mesh$vb)[mesh$it,1:3]
 

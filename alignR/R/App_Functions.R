@@ -138,64 +138,64 @@ getmode <- function(v) {
 # }
 
 
-shinySelectPoints3d <- function(specimen, verts, par_input, shinyBrush){
-  specimen <- specimen
-  verts <- verts
-  tmp_proj <- shinyEnvironment(par_input)
-  click_x <- shinyBrush$region[1]
-  click_y <- shinyBrush$region[2]
+# shinySelectPoints3d <- function(specimen, verts, par_input, shinyBrush){
+#   specimen <- specimen
+#   verts <- verts
+#   tmp_proj <- shinyEnvironment(par_input)
+#   click_x <- shinyBrush$region[1]
+#   click_y <- shinyBrush$region[2]
+#
+#
+#   tmp_coords <- rgl.user2window(x=verts, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
+#   tmp_z <- tmp_coords[, 3] #grab the z values
+#   keep <- (0 <= tmp_z) & (tmp_z <= 1) #keep only those z coords b/w zero and one
+#
+#   tmp_x <- tmp_coords[, 1] #grab the x values of the window? coordinates
+#   x_dist <- (tmp_x - click_x)^2
+#
+#   tmp_y <- tmp_coords[, 2]
+#   y_dist <- (tmp_y - click_y)^2
+#
+#   dist <- x_dist + y_dist #adds the x and y distributions together
+#   sort_dist <- sort.int(dist, decreasing = TRUE, index.return = TRUE)$ix
+#
+#   # nearest_verts <- verts[match(c(1,2,3),sort_dist),]
+#   verts <- verts[match(c(1),sort_dist),,drop = F]
+#   coords <- specimen[match(c(1),sort_dist),,drop = F]
+#
+#   return(list("verts" = verts,
+#               "coords" = coords))
+# }
 
 
-  tmp_coords <- rgl.user2window(x=verts, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
-  tmp_z <- tmp_coords[, 3] #grab the z values
-  keep <- (0 <= tmp_z) & (tmp_z <= 1) #keep only those z coords b/w zero and one
-
-  tmp_x <- tmp_coords[, 1] #grab the x values of the window? coordinates
-  x_dist <- (tmp_x - click_x)^2
-
-  tmp_y <- tmp_coords[, 2]
-  y_dist <- (tmp_y - click_y)^2
-
-  dist <- x_dist + y_dist #adds the x and y distributions together
-  sort_dist <- sort.int(dist, decreasing = TRUE, index.return = TRUE)$ix
-
-  # nearest_verts <- verts[match(c(1,2,3),sort_dist),]
-  verts <- verts[match(c(1),sort_dist),,drop = F]
-  coords <- specimen[match(c(1),sort_dist),,drop = F]
-
-  return(list("verts" = verts,
-              "coords" = coords))
-}
-
-
-shinyUserProj <- function(par_input){
-  #par_input from shinyGetPar3d to get the model, projection, and view for the current orientation of the shape in the rglwidget
-  x <- list()
-  # temp_model <- par_input$userMatrix
-  # temp_model[,4]<- t(par_input$modelMatrix[4,])
-  # x[["model"]] <- temp_model
-  x[["model"]] <- par_input$modelMatrix
-  x[["proj"]] <- par_input$projMatrix
-  #need to create viewport that actually lists the proper pixel dimensions of the rgl window (viewport just gives window dimensions of 1)
-  # temp_view <- par_input$viewport
-  # temp_view[1:4] <- par_input$windowRect
-  # x[["view"]] <- temp_view
-  x[["view"]] <- par_input$viewport
-  return(x)
-}
-
-shinyWindowProj <- function(par_input){
-  #par_input from shinyGetPar3d to get the model, projection, and view for the current orientation of the shape in the rglwidget
-  x <- list()
-  x[["model"]] <- par_input$modelMatrix
-  x[["proj"]] <- par_input$projMatrix
-  #need to create viewport that actually lists the proper pixel dimensions of the rgl window (viewport just gives window dimensions of 1)
-  # temp_view <- par_input$viewport
-  # temp_view[1:4] <- par_input$windowRect
-  # x[["view"]] <- temp_view
-  x[["view"]] <- par_input$viewport
-  return(x)
-}
+# shinyUserProj <- function(par_input){
+#   #par_input from shinyGetPar3d to get the model, projection, and view for the current orientation of the shape in the rglwidget
+#   x <- list()
+#   # temp_model <- par_input$userMatrix
+#   # temp_model[,4]<- t(par_input$modelMatrix[4,])
+#   # x[["model"]] <- temp_model
+#   x[["model"]] <- par_input$modelMatrix
+#   x[["proj"]] <- par_input$projMatrix
+#   #need to create viewport that actually lists the proper pixel dimensions of the rgl window (viewport just gives window dimensions of 1)
+#   # temp_view <- par_input$viewport
+#   # temp_view[1:4] <- par_input$windowRect
+#   # x[["view"]] <- temp_view
+#   x[["view"]] <- par_input$viewport
+#   return(x)
+# }
+#
+# shinyWindowProj <- function(par_input){
+#   #par_input from shinyGetPar3d to get the model, projection, and view for the current orientation of the shape in the rglwidget
+#   x <- list()
+#   x[["model"]] <- par_input$modelMatrix
+#   x[["proj"]] <- par_input$projMatrix
+#   #need to create viewport that actually lists the proper pixel dimensions of the rgl window (viewport just gives window dimensions of 1)
+#   # temp_view <- par_input$viewport
+#   # temp_view[1:4] <- par_input$windowRect
+#   # x[["view"]] <- temp_view
+#   x[["view"]] <- par_input$viewport
+#   return(x)
+# }
 
 shinyClickLine <- function(par_input, shinyBrush){
 
@@ -209,7 +209,8 @@ shinyClickLine <- function(par_input, shinyBrush){
   return(list("clickpoint" = tmp_matrix[1,], "clickline" = win_line, "proj" = tmp_proj))
 }
 
-shinyTriangleDist <- function(centers, verts, tris, N, par_input, shinyBrush){
+
+shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
   #centers is an array of the center points for each triangle
   #verts is an array of triangle verticies for the mesh
   #tris is a matrix containig vertex indices of the triangles of the mesh
@@ -217,39 +218,92 @@ shinyTriangleDist <- function(centers, verts, tris, N, par_input, shinyBrush){
   #par_input is an input from shinyGetPar3d to get the model, projection, and view for the current orientation of the shape in the rglwidget
   #shinyBrush contains the output of the click
 
+  ## load in variables
   tmp_centers <- centers
   tmp_verts <- verts
   tmp_tris <- tris
   ntri <- N
   tmp_proj <- par_input
-  tmp_click <- c(shinyBrush$region[c(1,2)],c(0)) #sets the z coordinate to 0
+  tmp_click <- shinyBrush$region[c(1,2)]
+  ##
+  ## make click matrix, single click value, and convert to click to user coordinate values
+  dbl_click <- c(tmp_click,tmp_click)
+  click_matrix <- cbind(matrix(dbl_click,ncol = 2, byrow = T), c(0,1))
+  sgl_click <- click_matrix[1,]
 
-  win_centers <- rgl.user2window(x=tmp_centers, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
-  # win_verts <- rgl.user2window(x=tmp_verts, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
-
+  user_click <- rgl.window2user(x=click_matrix, projection = tmp_proj)
+  colnames(user_click) <- c("x", "y", "z")
+  ##
+  ## convert centers and verts of triangles to window coordinate values
+  win_centers <- rgl.user2window(x=tmp_centers, projection = tmp_proj) #extracts the window coordinates that correspond to the centers given the projection
+  win_verts <- rgl.user2window(x=tmp_verts, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
   if(is.vector(win_centers)){
     win_centers = t(as.matrix(win_centers))
-    }
-
-  tri_diff = as.matrix(win_centers - tmp_click)
+  }
+  if(is.vector(win_verts)){
+    win_verts = t(as.matrix(win_verts))
+  }
+  ##
+  ## calculate distance between triangle centers and the click coordinate
+  tri_diff = as.matrix(win_centers - sgl_click)
   colnames(tri_diff) <- c("x", "y", "z")
   tri_dist = apply(win_centers[,1:2], 1, function(x,y){dist(rbind(x,y))}, y= tmp_click[1:2])
+  ##
 
   tri_data <- cbind(tri_diff,tri_dist)
-  tri_order <- order(tri_data[,4], decreasing = F)[1:ntri]
+  tri_order <- order(tri_data[,4], decreasing = F)[1:ntri] # get closest centers sorted by window XY distance
 
-  tri.i <- seq(1, nrow(tmp_tris),by = 3 )[tri_order] # make a dummy triangle index
-  tri.v <- as.vector(sapply(tri.i, FUN = function(X,Y) X + c(0:2))) # triangle vertex index
+  # tri.i <- seq(1, nrow(tmp_tris),by = 3 )[tri_order] # make a dummy triangle index
+  # tri.v <- as.vector(sapply(tri.i, FUN = function(X,Y) X + c(0:2))) # triangle vertex index
 
-  nearestCenters <- tmp_centers[tri_order,] # these are the scene coords of the nearest triangle centers
-  nearestTris <- tmp_verts[tri.v,] # these are the scene coords of the triangle vertices
+  tri_index <- seq(1, nrow(tmp_verts),by = 3 )[tri_order] # make a dummy triangle index
+  tri.v <- as.vector(sapply(tri_index, FUN = function(X,Y) X + c(0:2))) # triangle vertex index
 
-  return(list("coords" = nearestCenters,
-              "tris" = nearestTris
-              ))
+  # nearestCenters <- tmp_centers[tri_order,] # these are the scene coords of the nearest triangle centers
+  # nearestTris <- tmp_verts[tri.v,] # these are the scene coords of the triangle vertices
+  # near_wintris <- win_verts[tri.v,] # window coords of nearest triangles
+  objtris <- tmp_verts[tri.v,] # mesh coords of the nearest triangles
+  # rownames(near_wintris) <- tri.v
+
+  require(sp)
+
+  pt.inside.tri <- sapply(X = tri_index, FUN = function(X,PT,TRI){
+    (point.in.polygon(PT[1,1],PT[1,2], TRI[X++c(0:2),1],TRI[X++c(0:2),2])==1)
+  }, PT = click_matrix, TRI = win_verts)
+
+  subtending.tri.ind <- t(sapply(tri_index[pt.inside.tri], FUN = function(X) X+c(0:2)))
+
+  firstTRI <- mean(win_verts[t(subtending.tri.ind)[1:3],3]) <  mean(win_verts[t(subtending.tri.ind)[4:6],3])
+
+  if(firstTRI){
+
+    clktri <- tmp_verts[t(subtending.tri.ind)[1:3],]
+
+  } else{
+
+    clktri <- tmp_verts[t(subtending.tri.ind)[4:6],]
+
+  }
+
+  # CALC CLK COORDS
+  decomptri<- prcomp(as.matrix(clktri))
+  pcvect <- as.data.frame(predict(decomptri,user_click))
+
+  a = pcvect[1,]
+  b = pcvect[2,]
+
+  t = (0 - a[3])/ (b[3] - a[3])
+
+  ptcoords <- a+unlist(lapply((b-a), FUN = function(X,Y) Y*X, Y=t))
+
+  clkpt <- (as.matrix(ptcoords) %*% t(decomptri$rotation) ) + decomptri$center
+
+  return(list("coords" = clkpt,
+              "tris" = objtris)
+         )
 }
 
-MeshManager <- function(object, size = 1, center = TRUE){
+MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
   ###
   # this function is to do some pre-processing of the mesh file, including determining the file type,
   # if the file should be centered, and checking coloring of the mesh
@@ -262,7 +316,7 @@ MeshManager <- function(object, size = 1, center = TRUE){
   spec <-  object
   ptsize <- size
   center <- center
-
+  color <- color
 
   spec.name <- deparse(substitute(spec))
   mesh <- NULL
@@ -279,31 +333,13 @@ MeshManager <- function(object, size = 1, center = TRUE){
     }
     # create mesh and check for material colors
     mesh <- spec
-    if (is.null(mesh$material))
-      mesh$material$color <- "gray"
-    if (is.null(mesh$material$color))
-      mesh$material$color <- "gray"
+    mesh$material$color <- color
   }
 
   # if the object is not a mesh object or a matrix, then we want to stop and give an error
-  else if (inherits(spec, "matrix") == FALSE) {
-    stop("File is not a shape3d/mesh3d object or xyz matrix") #need to replace with an actual modal warning
-  }
-  # if the object is an appropriately formatted matrix, then we can move to centering
-  else if (inherits(spec, "matrix") == TRUE && dim(spec)[2] ==
-           3) {
-    if (center == TRUE) {
-      specimen <- scale(spec, scale = FALSE)
-    }
-    if (center == FALSE) {
-      specimen <- spec
-    }
-  }
-  # give warning if it is a matrix, but not properly formatted, then give a error
   else {
-    stop("File is not matrix in form: vertices by xyz") #need to replace with an actual modal warning
+    stop("File is not a shape3d/mesh3d object") #need to replace with an actual modal warning
   }
-
 
   return(list("specimen" = specimen, "mesh" = mesh, "ptsize" = ptsize))
 

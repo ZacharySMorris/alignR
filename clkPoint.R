@@ -85,8 +85,8 @@ clkPoint <- function(plot = T){
   
   ptcoords <- a+unlist(lapply((b-a), FUN = function(X,Y) Y*X, Y=t))
   
-  polygon(decomptri$x)
-  points(ptcoords)
+  # polygon(decomptri$x)
+  # points(ptcoords)
   
   clkpt <- (as.matrix(ptcoords) %*% t(decomptri$rotation) ) + decomptri$center
   if(plot){
