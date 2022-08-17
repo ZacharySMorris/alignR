@@ -1,5 +1,44 @@
 ###Function to add coordinates to data.frame
 
+changeAnalysis <- function(current_tab, next_tab){
+  current_tab <- current_tab
+  next_tab <- next_tab
+
+  shinyalert(
+    title = "",
+    text = "Changing analyses will delete all current landmark data. \n Do you still want to proceed?",
+    size = "xs",
+    closeOnEsc = FALSE,
+    closeOnClickOutside = FALSE,
+    html = FALSE,
+    type = "success",
+    showConfirmButton = TRUE,
+    showCancelButton = TRUE,
+    confirmButtonText = "Yes!",
+    confirmButtonCol = "#AEDEF4",
+    cancelButtonText = "No!",
+    timer = 0,
+    imageUrl = "https://fontawesome.com/icons/question-circle?style=light",
+    animation = TRUE,
+    callbackR = function(x) {
+      print(x)
+      if(x){
+
+        updateNumericInput(session,inputId = "n", value = 10)
+        showElement(id="n")
+        tab_n(next_tab)
+        shinyjs::disable(paste("tab", next_tab, sep = ""))
+        shinyjs::enable('tab2')
+        shinyjs::enable('tab3')
+
+      } else{
+        click(paste("tab", current_tab, sep = ""))
+      }
+    }
+  )
+  }
+
+
 saveLMs <- function(x,current_lm,keep) {
   if (exists("landmarks")){
     landmarks[as.numeric(current_lm),] <<- keep
@@ -9,39 +48,47 @@ saveLMs <- function(x,current_lm,keep) {
   }
 }
 
-loadLMs <- function() {
+loadLMs <- function(x,current_sp) {
+  if (!is.null(x[[current_sp]])){
+    landmarks <<- x[[current_sp]]
+  } else {
+    landmarks <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
+  }
+}
+
+printLMs <- function() {
   if (exists("landmarks")) {
     landmarks
   }
 }
 
 clearLMs <- function(x){
-  if (exists("landmarks")){
+  # if (exists("landmarks")){
     landmarks <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
-  }
+  # }
 }
 
 
-saveVerts <- function(x,current_lm,keep) {
-  if (exists("vertices")){
-    vertices[as.numeric(current_lm),] <<- keep
-  } else{
-    vertices <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
-    vertices[as.numeric(current_lm),] <<- keep
-  }
-}
-
-loadVerts <- function() {
-  if (exists("vertices")) {
-    vertices
-  }
-}
-
-clearVerts <- function(x){
-  if (exists("vertices")){
-    vertices <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
-  }
-}
+# saveVerts <- function(x,current_lm,keep) {
+#   if (exists("vertices")){
+#     vertices[as.numeric(current_lm),] <<- keep
+#   } else{
+#     vertices <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
+#     vertices[as.numeric(current_lm),] <<- keep
+#   }
+# }
+#
+# loadVerts <- function() {
+#   if (exists("vertices")) {
+#     vertices
+#   }
+# }
+#
+# clearVerts <- function(x){
+#   if (exists("vertices")){
+#     vertices <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
+#   }
+# }
 
 next.sp <- function(x,n){
   if (x < n){
@@ -224,19 +271,24 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
   tmp_tris <- tris
   ntri <- N
   tmp_proj <- par_input
-  tmp_click <- shinyBrush$region[c(1,2)]
+  tmp_click <- shinyBrush$region[1:2]
   ##
   ## make click matrix, single click value, and convert to click to user coordinate values
   dbl_click <- c(tmp_click,tmp_click)
   click_matrix <- cbind(matrix(dbl_click,ncol = 2, byrow = T), c(0,1))
   sgl_click <- click_matrix[1,]
 
+  # print("inital click_matrix:")
+  # print(click_matrix)
+  # print("inside tmp_proj:")
+  # print(tmp_proj)
+
   user_click <- rgl.window2user(x=click_matrix, projection = tmp_proj)
   colnames(user_click) <- c("x", "y", "z")
   ##
   ## convert centers and verts of triangles to window coordinate values
   win_centers <- rgl.user2window(x=tmp_centers, projection = tmp_proj) #extracts the window coordinates that correspond to the centers given the projection
-  win_verts <- rgl.user2window(x=tmp_verts, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
+  win_verts <- rgl.user2window(x=tmp_tris, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
   if(is.vector(win_centers)){
     win_centers = t(as.matrix(win_centers))
   }
@@ -253,11 +305,21 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
   tri_data <- cbind(tri_diff,tri_dist)
   tri_order <- order(tri_data[,4], decreasing = F)[1:ntri] # get closest centers sorted by window XY distance
 
+  # print(cat("tri_data 1: ", class(tri_data), ", ", dim(tri_data)))
+  # print(head(tri_data))
+  # print(cat("tri_order: ", class(tri_order), ", ", length(tri_order)))
+  # print(tri_order)
+
   # tri.i <- seq(1, nrow(tmp_tris),by = 3 )[tri_order] # make a dummy triangle index
   # tri.v <- as.vector(sapply(tri.i, FUN = function(X,Y) X + c(0:2))) # triangle vertex index
 
-  tri_index <- seq(1, nrow(tmp_verts),by = 3 )[tri_order] # make a dummy triangle index
+  tri_index <- seq(1, nrow(tmp_tris),by = 3 )[tri_order] # make a dummy triangle index
   tri.v <- as.vector(sapply(tri_index, FUN = function(X,Y) X + c(0:2))) # triangle vertex index
+#
+#   print(cat("tri_index: ", class(tri_index), ", ", length(tri_index)))
+#   print(tri_index)
+#   print(cat("tri.v: ", class(tri.v), ", ", length(tri.v)))
+#   print(tri.v)
 
   # nearestCenters <- tmp_centers[tri_order,] # these are the scene coords of the nearest triangle centers
   # nearestTris <- tmp_verts[tri.v,] # these are the scene coords of the triangle vertices
@@ -265,42 +327,101 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
   objtris <- tmp_verts[tri.v,] # mesh coords of the nearest triangles
   # rownames(near_wintris) <- tri.v
 
+  # print(cat("objtris: ", class(objtris), dim(objtris)))
+  # print(head(objtris))
+
   require(sp)
 
-  pt.inside.tri <- sapply(X = tri_index, FUN = function(X,PT,TRI){
-    (point.in.polygon(PT[1,1],PT[1,2], TRI[X++c(0:2),1],TRI[X++c(0:2),2])==1)
-  }, PT = click_matrix, TRI = win_verts)
+  # print("click_matrix:")
+  # print(click_matrix)
+  # print("tri_index:")
+  # print(head(tri_index))
+  # print("win_verts:")
+  # print(head(win_verts))
+  #
+  # print(point.in.polygon(click_matrix[1,1],click_matrix[1,2], win_verts[tri_index[1]+c(0:2),1],win_verts[tri_index[1]+c(0:2),2]))
 
-  subtending.tri.ind <- t(sapply(tri_index[pt.inside.tri], FUN = function(X) X+c(0:2)))
 
-  firstTRI <- mean(win_verts[t(subtending.tri.ind)[1:3],3]) <  mean(win_verts[t(subtending.tri.ind)[4:6],3])
+  pt.inside.tri <- logical(length = length(tri_index))
+  pt.inside.tri_values <- c()
 
-  if(firstTRI){
+  for (i in 1:length(tri_index)){
+    cur_tri <- tri_index[i] + c(0:2)
+    X <- win_verts[cur_tri,]
 
-    clktri <- tmp_verts[t(subtending.tri.ind)[1:3],]
+    cur_ans <- point.in.polygon(sgl_click[1], sgl_click[2], X[,1], X[,2])
 
-  } else{
-
-    clktri <- tmp_verts[t(subtending.tri.ind)[4:6],]
-
+    pt.inside.tri[[i]] <- cur_ans == 1
+    pt.inside.tri_values[[i]] <- cur_ans
   }
 
-  # CALC CLK COORDS
-  decomptri<- prcomp(as.matrix(clktri))
-  pcvect <- as.data.frame(predict(decomptri,user_click))
+  # pt.inside.tri <- sapply(X = tri_index, FUN = function(X,PT,TRI){
+  #   (point.in.polygon(PT[1,1],PT[1,2], TRI[X+c(0:2),1],TRI[X+c(0:2),2])==1)
+  # }, PT = click_matrix, TRI = win_verts)
 
-  a = pcvect[1,]
-  b = pcvect[2,]
 
-  t = (0 - a[3])/ (b[3] - a[3])
+  if (! 1 %in% pt.inside.tri){
+    # tmp_thing <- tmp_tris == tmp_verts
+    # print(cat("tmp_verts = tmp_tris: ", ! FALSE %in% tmp_thing))
+    # print(cat("pt.inside.tri: ", class(pt.inside.tri), length(pt.inside.tri)))
+    # print(pt.inside.tri)
+    # print(all(pt.inside.tri_values == 1))
+    # print(cat("pt.inside.tri_values: ", class(pt.inside.tri_values), length(pt.inside.tri_values)))
+    # print(pt.inside.tri_values)
+    # print(cat("click_matrix: ", class(click_matrix), click_matrix))
 
-  ptcoords <- a+unlist(lapply((b-a), FUN = function(X,Y) Y*X, Y=t))
+      # showToast(type = "error",
+      #           message = "Click could not find triangles.",
+      #           title = " Please reposition and attempt landmarking.",
+      #           keepVisible = TRUE,
+      #           .options = list(positionClass = "toast-top-center", closeButton = TRUE, progressBar = FALSE)
+      # )
 
-  clkpt <- (as.matrix(ptcoords) %*% t(decomptri$rotation) ) + decomptri$center
+      error_click <- rgl.window2user(x=cbind(0.5,0.5,0.5), projection = tmp_proj)
+      colnames(error_click) <- c("x", "y", "z")
 
-  return(list("coords" = clkpt,
-              "tris" = objtris)
-         )
+      return(list("coords" = error_click,
+                  "tris" = objtris,
+                  "error" = TRUE)
+      )
+  } else {
+    subtending.tri.ind <- t(sapply(tri_index[pt.inside.tri], FUN = function(X) X+c(0:2)))
+
+    # print(cat("subtending.tri.ind: ", class(subtending.tri.ind), dim(subtending.tri.ind)))
+    # print(subtending.tri.ind)
+    # print(t(subtending.tri.ind)[1:3])
+
+    firstTRI <- mean(win_verts[t(subtending.tri.ind)[1:3],3]) <  mean(win_verts[t(subtending.tri.ind)[4:6],3])
+
+    if(firstTRI){
+
+      clktri <- tmp_verts[t(subtending.tri.ind)[1:3],]
+
+    } else{
+
+      clktri <- tmp_verts[t(subtending.tri.ind)[4:6],]
+
+    }
+
+    # CALC CLK COORDS
+    decomptri<- prcomp(as.matrix(clktri))
+    pcvect <- as.data.frame(predict(decomptri,user_click))
+
+    a = pcvect[1,]
+    b = pcvect[2,]
+
+    t = (0 - a[3])/ (b[3] - a[3])
+
+    ptcoords <- a+unlist(lapply((b-a), FUN = function(X,Y) Y*X, Y=t))
+
+    clkpt <- (as.matrix(ptcoords) %*% t(decomptri$rotation) ) + decomptri$center
+    # print(cat("coords: ", clkpt))
+
+    return(list("coords" = c(clkpt),
+                "tris" = objtris,
+                "error" = FALSE)
+    )
+    }
 }
 
 MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
@@ -343,4 +464,17 @@ MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
 
   return(list("specimen" = specimen, "mesh" = mesh, "ptsize" = ptsize))
 
+}
+
+alignRPar3d <- function(x){
+  #x should be input$par3d which has been updated via shinyGetPar3d
+  rgl.viewpoint(userMatrix = x$userMatrix)
+  tmp_par <- rgl.projection()
+  # tmp_par$zoom <- x$zoom
+  # print("cur_par output:")
+  # print(tmp_par)
+  showElement(id = "submitLM")
+  hideElement(id = "getPar")
+
+  return(tmp_par)
 }

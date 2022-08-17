@@ -158,7 +158,8 @@ ui <- fluidPage(
   sidebarLayout(
     mainPanel(setBackgroundColor(color = "SlateGray"),
               rglwidgetOutput("plot_3D"),
-              uiOutput("plot_3D_mousemode")
+              uiOutput("plot_3D_mousemode"),
+              actionButton("getPar", "Get Parameters", icon = icon("sliders"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray"),
     ),
     sidebarPanel(style = "background-color:#c55347;border-color:#c55347;color:#fff",
                  hidden(numericInput("n", "Number of fixed landmarks", 6)),
@@ -195,7 +196,7 @@ server <- function(input, output, session) {
   verts <- NULL
   centers <- NULL
   spec_tri <- NULL
-  tmp_coords <- NULL
+  tmp_coords <- reactiveVal(NA)
   # all_LMs <- NULL
 
   observeEvent(input$clear, {
@@ -265,86 +266,113 @@ server <- function(input, output, session) {
     rglwidget(MeshData(),
               shared = sharedData,
               shinyBrush = "rgl_3D_brush") ## need to add shared and shinyBrush calls into the rglwidget
-  })
-
-  # observeEvent(input$getPar, {
-  #   shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene"), session)
-  #     cur_par <<- input$par3d
-  # })
-
-  # input$plot_3D_mousemode
-
-  observeEvent(input$goLM, {
-    HTML(
-      "document.getElementById(this.attributes.rglSceneId.value).rglinstance.
-      setMouseMode('selecting',
-             button = parseInt(this.attributes.rglButton.value),
-             subscene = parseInt(this.attributes.rglSubscene.value),
-             stayActive = parseInt(this.attributes.rglStayActive.value))"
-    )
-
-    # session$sendCustomMessage("selectingMouse", 'value = "selecting"')
-
-    # session$sendCustomMessage("selectingMouse",
-    #                           list(subscene = currentSubscene3d(cur3d()),
-    #                                parameter = "mouseMode",
-    #                                value = c("selecting","zoom","fov","pull")))
-
-    # shiny:::toJSON(list(subscene = currentSubscene3d(cur3d()),
-    #                     parameter = "mouseMode",
-    #                     value = c("selecting","zoom","fov","pull")))
-
-    # shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene"), session)
-    # shinyResetBrush(session, "rgl_3D_brush")
-    # tmp_proj <- shinyUserProj(input$par3d)
-    # delay(1000)
-  })
-
-  observeEvent(input$submitLM, {
-
-    shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene"), session)
-
-    tmp_par <- rgl.projection()
-    tmp_tris <- shinyTriangleDist(centers, verts, spec_tri, N=20, tmp_par, input$rgl_3D_brush)
-    tmp_click <- shinyClickLine(tmp_par, input$rgl_3D_brush)
-
-    tmp_coords <<- tmp_tris$coords
-
-    output$plot_3D <- renderRglwidget({
-      clear3d(type = "all")
-      rgl.bg(color = "SlateGray")
-      # plot3d(MeshData(),add = TRUE)
-      rgl.viewpoint(userMatrix = input$par3d$userMatrix)
-
-      wire3d(tmp_specimen$mesh)
-      lines3d(tmp_click$clickline, col = "red")
-      spheres3d(tmp_tris$coords, radius = 0.25, color = "green", add = TRUE)
-      triangles3d(tmp_tris$tris, color = "blue", add = TRUE)
-
-      rglwidget(scene3d(minimal = FALSE),
-                shared = sharedData,
-                shinyBrush = "rgl_3D_brush")
     })
 
-    if (isolate(input$NoWarnings) == FALSE){
-      showToast(type = "warning",
-                message = "Click confirm or select again.",
-                title = "Is this landmark correctly placed?",
-                keepVisible = TRUE,
-                .options = list(positionClass = "toast-top-left", closeButton = TRUE, progressBar = FALSE)
-                )
+  #make this a call to an invisible botton and then add a click of that when you click landmark button?
+  observeEvent(input$getPar, {
+    rgl.viewpoint(userMatrix = input$par3d$userMatrix)
+    shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene"), session)
+    print("cur_par output:")
+    print(rgl.projection())
+  })
+
+  # cur_par <- eventReactive(input$getPar, {
+  #   # rgl.viewpoint(userMatrix = input$par3d$userMatrix)
+  #   rgl.projection()
+  #   # print("cur_par output:")
+  #   # print(rgl.projection())
+  #   })
+
+  current_par <- reactive({
+    rgl.projection()
+  })
+
+
+  # observeEvent(input$goLM, {
+  #   # click(id = "getPar")
+  #   tmp_par <- current_par()
+  #
+  #   showElement(id = "submitLM")
+  #   # hideElement(id = "goLM")
+  #
+  #
+  # })
+
+  observeEvent(input$submitLM, {
+    shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene"), session)
+    click(id = "getPar")
+
+    tmp_par <- current_par()
+    print("tmp_par:")
+    print(tmp_par)
+    if (is.nan(tmp_par$model) || all(tmp_par$model[,1]==0)){
+      click(id = "submitLM")
+      # tmp_par <- rgl.projection()
+      # print("updated tmp_par:")
+      # print(tmp_par)
+    } else {
+      # print(cat("centers:", class(centers), "verts:", class(verts), "spec_tri:", class(spec_tri), "tmp_par:", class(tmp_par), "input$rgl_3D_brush:", class(input$rgl_3D_brush$region), sep = "\n"))
+      # print(cat("click input: ", input$rgl_3D_brush$region[c(1,2)], sep = ""))
+      # print("current landmarks:")
+      # print(loadLMs())
+      # print("tmp_par input:")
+      # print(tmp_par)
+      # print("input$par3d input:")
+      # print(input$par3d[c("modelMatrix","projMatrix", "viewport", "userMatrix","userProjection")])
+      # print(landmarks)
+
+      # tmp_tris <- shinyTriangleDist(centers, verts, spec_tri, N=20, tmp_par, input$rgl_3D_brush)
+      tmp_selection <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, input$rgl_3D_brush)
+      tmp_coords(tmp_selection$coords)
+      # tmp_coords(c(0.4,0.4,0.4))
+      # tmp_click <- shinyClickLine(tmp_par, input$rgl_3D_brush)
+
+      # tmp_coords <<- tmp_selection$coords
+      print(tmp_coords())
+      # print(loadLMs()[1,])
+
+      output$plot_3D <- renderRglwidget({
+        clear3d(type = "all")
+        rgl.bg(color = "SlateGray")
+        plot3d(MeshData(),add = TRUE)
+        rgl.viewpoint(userMatrix = input$par3d$userMatrix)
+
+        # wire3d(tmp_specimen$mesh)
+        # lines3d(tmp_click$clickline, col = "red")
+        spheres3d(tmp_selection$coords, radius = 0.25, color = "green", add = TRUE)
+        # triangles3d(tmp_selection$tris, color = "blue", add = TRUE)
+
+        rglwidget(scene3d(minimal = FALSE),
+                  shared = sharedData,
+                  shinyBrush = "rgl_3D_brush")
+      })
+
+      if(tmp_selection$error == FALSE){
+        if (isolate(input$NoWarnings) == FALSE){
+          showToast(type = "warning",
+                    message = "Click confirm or select again.",
+                    title = "Is this landmark correctly placed?",
+                    keepVisible = TRUE,
+                    .options = list(positionClass = "toast-top-left", closeButton = TRUE, progressBar = FALSE)
+          )
+        }
+        showElement(id = "confirmLM")
+      }
     }
-    show("confirmLM")
   })
 
   #if confirmed, save the specimen coords to landmarks and save rglwindow coords to vert list (invisible)
   observeEvent(input$confirmLM, {
       current_lm <- as.numeric(input$Lm_n)
 
-      tmp_LMs <- tmp_coords
+      tmp_LMs <- tmp_coords()
+      # print(tmp_LMs)
 
       # saveVerts(input$n, current_lm, tmp_verts)
-      saveLMs(input$n, current_lm, tmp_LMs[1,])
+      saveLMs(input$n, current_lm, tmp_LMs)
+
+      # print(landmarks)
+      # print(loadLMs())
 
     output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {
       loadLMs()
@@ -370,7 +398,7 @@ server <- function(input, output, session) {
       updateSelectInput(session, "Lm_n", selected = next_lm)
       }
 
-      hide("confirmLM")
+      hideElement(id = "confirmLM")
     })
 }
 
@@ -390,6 +418,37 @@ setMouseMode('selecting',
 ###
 
 #######
+
+observeEvent(input$goLM, {
+  HTML(
+    "document.getElementById(this.attributes.rglSceneId.value).rglinstance.
+      setMouseMode('selecting',
+             button = parseInt(this.attributes.rglButton.value),
+             subscene = parseInt(this.attributes.rglSubscene.value),
+             stayActive = parseInt(this.attributes.rglStayActive.value))"
+  )
+
+  # session$sendCustomMessage("selectingMouse", 'value = "selecting"')
+
+  # session$sendCustomMessage("selectingMouse",
+  #                           list(subscene = currentSubscene3d(cur3d()),
+  #                                parameter = "mouseMode",
+  #                                value = c("selecting","zoom","fov","pull")))
+
+  # shiny:::toJSON(list(subscene = currentSubscene3d(cur3d()),
+  #                     parameter = "mouseMode",
+  #                     value = c("selecting","zoom","fov","pull")))
+
+  # shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene"), session)
+  # shinyResetBrush(session, "rgl_3D_brush")
+  # tmp_proj <- shinyUserProj(input$par3d)
+  # delay(1000)
+})
+
+
+
+
+
 
 output$brush_info_3D <- renderPrint({
   if(length(input$rgl_3D_brush) == 0 || input$rgl_3D_brush$state == "inactive") return(NULL)
