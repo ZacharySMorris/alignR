@@ -225,7 +225,8 @@ alignR_server <- function(input, output, session) {
 
   output$cur_specimen <- renderUI({
     cur_sp_name <- names(sp_list)[[cur_sp()]]
-    h4(cur_sp_name, style = "padding-left:20px; color:#fff")
+    # h4(cur_sp_name, style = "padding-left:20px; color:#fff")
+    h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
   })
 ##
 
@@ -274,7 +275,7 @@ alignR_server <- function(input, output, session) {
     clear3d()
     rgl.bg(color = "SlateGray")
 
-    if (is.na(lm_array[[cur_sp()]])){
+    if (!exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
       rglwidget(MeshData(),
                 shared = sharedData,
                 shinyBrush = "rgl_3D_brush")
@@ -482,7 +483,7 @@ alignR_server <- function(input, output, session) {
 
   observeEvent(input$load, {
   lm_array <<- get('lm_list', envir = .GlobalEnv)
-    loadLMs(lm_array, cur_sp())
+    loadLMs(lm_array, cur_sp(), as.numeric(input$n))
 
     output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {
       printLMs()
@@ -507,12 +508,13 @@ alignR_server <- function(input, output, session) {
   observeEvent(input$save, {
     lm_array[[cur_sp()]] <<- landmarks
     assign('lm_list', lm_array, envir = .GlobalEnv)
+    list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
   })
 
   observeEvent(input$quit, {
     lm_array[[cur_sp()]] <<- landmarks
     assign('lm_list', lm_array, envir = .GlobalEnv)
-    list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt")
+    list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
     warnings()
     stopApp()
 

@@ -39,20 +39,20 @@ changeAnalysis <- function(current_tab, next_tab){
   }
 
 
-saveLMs <- function(x,current_lm,keep) {
+saveLMs <- function(n,current_lm,keep) {
   if (exists("landmarks")){
     landmarks[as.numeric(current_lm),] <<- keep
   } else{
-    landmarks <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
+    landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(paste("LM", 1:n, sep = "")), c("X","Y","Z")))
     landmarks[as.numeric(current_lm),] <<- keep
   }
 }
 
-loadLMs <- function(x,current_sp) {
-  if (!is.null(x[[current_sp]])){
+loadLMs <- function(x,current_sp,n) {
+  if (exists(names(x)[current_sp],where=x,mode="numeric")){
     landmarks <<- x[[current_sp]]
   } else {
-    landmarks <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
+    landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(paste("LM", 1:n, sep = "")), c("X","Y","Z")))
   }
 }
 
@@ -62,9 +62,9 @@ printLMs <- function() {
   }
 }
 
-clearLMs <- function(x){
+clearLMs <- function(n){
   # if (exists("landmarks")){
-    landmarks <<- array(NA, dim = c(x,3), dimnames = list(c(paste("LM", 1:x, sep = "")), c("X","Y","Z")))
+    landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(paste("LM", 1:n, sep = "")), c("X","Y","Z")))
   # }
 }
 
