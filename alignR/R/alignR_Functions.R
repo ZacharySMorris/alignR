@@ -15,7 +15,7 @@ readLandmarks <- function(x){
   for (i in seq(length(id_names))){
     tmp_id <- id_names[i]
     tmp_ends <- grep(tmp_id,lines)
-    if(!length(tmp_rows)==2){
+    if(!length(tmp_ends)==2){
       warning("Two or more specimen have identical names.")
     }
     tmp_rows <- seq(tmp_ends[1]+1,tmp_ends[2]-1)
@@ -39,27 +39,21 @@ readLandmarks <- function(x){
     landmark_df[[tmp_id]] <- tmp_matrix
   }
 
-#
-#   col_list[[1]] == col_list
-#
-#   rownames(landmark_df[[1]])
-#
-#   lapply(landmark_df,"rownames")
-#   unique(unlist(lapply(landmark_df,"colnames")))
-#
-#
-#   if( length(unique(gsub("nrow=|ncol=","",grep("nrow=|ncol=",paste(lines,sep = "\n"),value=T)))) == 1 )
-#   length(unique(gsub("nrow=","",grep("nrow=",unlist(test_line),value=T)))) == 1 #checks that all data have the same number of rows
-#   length(unique(gsub("ncol=","",grep("ncol=",unlist(test_line),value=T)))) == 1 #checks that all data have the same number of columns
-#   grep("^\t", temp_data2,value=T) == grep("^\t", temp_data2,value=T)[1] #check that all col names match
+  #check that all matrices have the same lengths (#LM*#dimensions)
+  if (all(sapply(landmark_df,length) == length(landmark_df[[1]]))){
+    tmp_array <- array(dim=c(length(row_list[[1]]),length(col_list[[1]]),length(id_names)),
+                       dimnames=list(row_list[[1]], col_list[[1]],id_names)) #create an array based on the dimensions of the first specimen
 
-  tmp_array <- array(dim=c(length(row_list[[1]]),length(col_list[[1]]),length(id_names)),dimnames=list(row_list[[1]], col_list[[1]],id_names))
+    for (i in seq(length(id_names))){
+      tmp_array[,,i] <- landmark_df[[i]] #loop through to fill array with proper values
+    }
 
-  for (i in seq(length(id_names))){
-    tmp_array[,,i] <- landmark_df[[i]]
-  }
+    return(tmp_array)
+  } else{
+    warning("The number of landmarks or dimensions do not match across all specimens.\nThe landmark data have been output as a list, rather than an array.")
+    return(landmark_df)
 
-  return(tmp_array)
+    }
 }
 
 
