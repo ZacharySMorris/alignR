@@ -40,6 +40,8 @@ names(lm_list) <- spec.fl
 
 shinyApp(alignR_ui, alignR_server)
 
+text_choose <- readLines(file.choose())
+
 test_shapes <-readShapes("Landmarks.txt")
 
 write.table(lm_list,file="Landmarks.txt",eol = "\n")

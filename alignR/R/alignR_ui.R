@@ -48,7 +48,7 @@ alignR_ui <- fluidPage(
                  ),
     ),
     mainPanel(
-      uiOutput("LM_n_title"),
+      uiOutput("spec_name"),
       uiOutput("cur_specimen"),
       verbatimTextOutput("testing", placeholder = FALSE),
       rglwidgetOutput("SpecimenPlot", width = "600px", height = "600px"),
@@ -60,13 +60,26 @@ alignR_ui <- fluidPage(
         actionButton("load", "Load", icon = icon("upload"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
         actionButton("save", "Save", icon = icon("save"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
         actionButton("quit", "Save & Quit", icon = icon("sign-out-alt"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
+        # uiOutput("cur_specimen"),
+        # selectInput("cur_specimen", NULL, names(sp_list)),
         align = "center"
       )
     )
   )
 )
 
-
+# , style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"
+#
+# .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+#   background-color: slategray;
+#   opacity: 1;
+# }
+#
+# .btn-default {
+#   color: #fff;
+#     background-color: slategray;
+#   border-color: slategray;
+# }
 
 
 

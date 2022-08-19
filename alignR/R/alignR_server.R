@@ -218,16 +218,32 @@ alignR_server <- function(input, output, session) {
 
 ## create object to contain the current specimen number and load in specimen list
   # cur_spec <- get('cur_spec', envir = .GlobalEnv) #not sure if this should be specified outside the shinyApp first and then called or set inside the server
-  cur_sp <- reactiveVal(1)
+  # cur_sp <- reactiveVal(1)
   sp_list <- get('sp_list', envir = .GlobalEnv)
   lm_array <- get('lm_list', envir = .GlobalEnv)
   sp_n <- length(sp_list)
+  point_sizes <<- get('point_sizes', envir = .GlobalEnv)
+
+  # output$spec_name <- renderUI({
+  #   cur_sp_name <- names(sp_list)[[cur_sp()]]
+  #   # h4(cur_sp_name, style = "padding-left:20px; color:#fff")
+  #   h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
+  # })
 
   output$cur_specimen <- renderUI({
-    cur_sp_name <- names(sp_list)[[cur_sp()]]
-    # h4(cur_sp_name, style = "padding-left:20px; color:#fff")
-    h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
+    # tags$style("
+    #     #cur_specimen ~ .selectize-input.full {
+    #         background-color: SlateGray;
+    #         border-color: SlateGray;
+    #         outline-color: SlateGray;
+    #         color: #fff;
+    #         font-size: 20px
+    #     }
+    #     ")
+    selectInput("cur_specimen", NULL, names(sp_list), width = "1000px")
   })
+
+  cur_sp <- reactive(grep(input$cur_specimen,names(sp_list)))
 ##
 
   #need to create an input that is the initial specimen value
@@ -267,6 +283,15 @@ alignR_server <- function(input, output, session) {
     return(scene1)
   })
 
+  LandmarkData <- reactive({
+    if (exists(names(lm_array)[[cur_sp()]],lm_array)){
+      return(lm_array[[cur_sp()]])
+    }else{
+      NULL
+      # matrix(data=0,ncol=3)
+    }
+    })
+
   # output$testing <- renderPrint({
   #   print(current_lm())
   # })
@@ -276,19 +301,18 @@ alignR_server <- function(input, output, session) {
     rgl.bg(color = "SlateGray")
 
     if (!exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
+    # if (!exists(LandmarkData(),mode="numeric")){
       rglwidget(MeshData(),
                 shared = sharedData,
                 shinyBrush = "rgl_3D_brush")
     } else{
 
-      all_LMs <- printLMs()
-
       output$SpecimenPlot <- renderRglwidget({
         clear3d(type = "all")
         # clear3d()
         plot3d(MeshData(),add = TRUE)
-        rgl.spheres(all_LMs[,1], all_LMs[,2], all_LMs[,3],
-                    radius = 0.1, color = c("red"), add = TRUE)
+        rgl.spheres(LandmarkData()[,1], LandmarkData()[,2], LandmarkData()[,3],
+                    radius = point_sizes[cur_sp()], color = c("red"), add = TRUE)
 
         rglwidget(scene3d(minimal = FALSE),
                   shared = sharedData,
@@ -332,7 +356,7 @@ alignR_server <- function(input, output, session) {
 
       # wire3d(tmp_specimen$mesh)
       # lines3d(tmp_click$clickline, col = "red")
-      spheres3d(tmp_tris$coords, radius = 0.1, color = "green", add = TRUE)
+      spheres3d(tmp_tris$coords, radius = point_sizes[cur_sp()], color = "green", add = TRUE)
       # triangles3d(tmp_tris$tris, color = "blue", add = TRUE)
 
       rglwidget(scene3d(minimal = FALSE),
@@ -377,21 +401,23 @@ alignR_server <- function(input, output, session) {
       printLMs()
     })
 
+    lm_array[[cur_sp()]] <<- landmarks
+
     #reload rglwidget with rgl.spheres from accepted landmarks
-
-    all_LMs <- printLMs()
-
-    output$SpecimenPlot <- renderRglwidget({
-      clear3d(type = "all")
-      # clear3d()
-      plot3d(MeshData(),add = TRUE)
-      rgl.spheres(all_LMs[,1], all_LMs[,2], all_LMs[,3],
-                  radius = 0.1, color = c("red"), add = TRUE)
-
-      rglwidget(scene3d(minimal = FALSE),
-                shared = sharedData,
-                shinyBrush = "rgl_3D_brush")
-    })
+    # LandmarkData(printLMs())
+    # all_LMs <- printLMs()
+    #
+    # output$SpecimenPlot <- renderRglwidget({
+    #   clear3d(type = "all")
+    #   # clear3d()
+    #   plot3d(MeshData(),add = TRUE)
+    #   rgl.spheres(all_LMs[,1], all_LMs[,2], all_LMs[,3],
+    #               radius = 0.1, color = c("red"), add = TRUE)
+    #
+    #   rglwidget(scene3d(minimal = FALSE),
+    #             shared = sharedData,
+    #             shinyBrush = "rgl_3D_brush")
+    # })
 
     if (current_lm < input$n){
       next_lm <- current_lm + 1
@@ -419,25 +445,16 @@ alignR_server <- function(input, output, session) {
           printLMs()
         })
 
+        # LandmarkData(printLMs())
+
       # }
-      cur_sp(next_spec)
+      updateSelectInput(session,"cur_specimen",selected = names(sp_list)[next_spec])
     } else{
       clearLMs(input$n)
       next_spec <- next.sp(cur_sp(),sp_n)
-      cur_sp(next_spec)
+      updateSelectInput(session,"cur_specimen",selected = names(sp_list)[next_spec])
       }
   })
-
-  # observeEvent(input$Next_Sp,{
-  #   if (!is.null(landmarks)) {
-  #     click("save")
-  #   }
-  #     clearLMs(input$n)
-  #     next_spec <- next.sp(cur_sp(),sp_n)
-  #     cur_sp(next_spec)
-  #
-  #     click("load")
-  # })
 
   observeEvent(input$Last_Sp,{
     if (!is.null(landmarks)) {
@@ -452,12 +469,14 @@ alignR_server <- function(input, output, session) {
         printLMs()
       })
 
+      # LandmarkData(printLMs())
+
     }
-    cur_sp(next_spec)
+    updateSelectInput(session,"cur_specimen",selected = names(sp_list)[next_spec])
   }else{
       clearLMs(input$n)
       next_spec <- prev.sp(cur_sp(),sp_n)
-      cur_sp(next_spec)
+      updateSelectInput(session,"cur_specimen",selected = names(sp_list)[next_spec])
     }
   })
 
@@ -482,26 +501,29 @@ alignR_server <- function(input, output, session) {
   })
 
   observeEvent(input$load, {
-  lm_array <<- get('lm_list', envir = .GlobalEnv)
+    file_load <<- file.choose()
+    lm_array <<- readLandmarks(file_load)
+    # lm_array <<- get('lm_list', envir = .GlobalEnv)
     loadLMs(lm_array, cur_sp(), as.numeric(input$n))
 
     output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {
       printLMs()
     })
 
-    all_LMs <- printLMs()
+    # LandmarkData(printLMs())
+    # all_LMs <- printLMs()
 
-    output$SpecimenPlot <- renderRglwidget({
-      clear3d(type = "all")
-      # clear3d()
-      plot3d(MeshData(),add = TRUE)
-      rgl.spheres(all_LMs[,1], all_LMs[,2], all_LMs[,3],
-                  radius = 0.1, color = c("red"), add = TRUE)
-
-      rglwidget(scene3d(minimal = FALSE),
-                shared = sharedData,
-                shinyBrush = "rgl_3D_brush")
-    })
+    # output$SpecimenPlot <- renderRglwidget({
+    #   clear3d(type = "all")
+    #   # clear3d()
+    #   plot3d(MeshData(),add = TRUE)
+    #   rgl.spheres(all_LMs[,1], all_LMs[,2], all_LMs[,3],
+    #               radius = 0.1, color = c("red"), add = TRUE)
+    #
+    #   rglwidget(scene3d(minimal = FALSE),
+    #             shared = sharedData,
+    #             shinyBrush = "rgl_3D_brush")
+    # })
 
   })
 
@@ -509,7 +531,8 @@ alignR_server <- function(input, output, session) {
     lm_array[[cur_sp()]] <<- landmarks
     assign('lm_list', lm_array, envir = .GlobalEnv)
     list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
-  })
+    save(lm_array,"lm_list.rda")
+    })
 
   observeEvent(input$quit, {
     lm_array[[cur_sp()]] <<- landmarks

@@ -1,10 +1,11 @@
 ### alignR function wrapper ###
 
-alignR <- function(file_dir,loadAll=TRUE){
+alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
   #file_dir is a file directory where surface files are located on user's computer
   #loadAll is a logical value determining whether all surface files should be loaded into a list or if they should be loaded only as needed for digitizing
    file_dir <- file_dir
    loadAll <- loadAll
+   file_name <- file_name
 
   #file_dir <- "~/Dropbox/alignR/alignR/data/turts/input"
   #loadAll <- TRUE
@@ -42,6 +43,10 @@ alignR <- function(file_dir,loadAll=TRUE){
     lm_list <- rep(list(NA),length(sp_list))
     names(lm_list) <- name_list
 
+    #create a list of specimen centroid sizes
+    cs_list <- sapply(sp_list,cSize)
+    point_sizes <- (cs_list / min(cs_list)) * 0.2
+
     # run shiny application to capture landmarks
     # this will save a bunch of individual CSV files for each specimen
     # ultimately will want to read in those files and add them by name to the lm_list
@@ -49,7 +54,8 @@ alignR <- function(file_dir,loadAll=TRUE){
     # ? should the original, individual CSVs be deleted onces combined ?
 
     shinyApp(alignR_ui, alignR_server)
-    write.table(lm_list,file="Landmarks.txt")
+    load("lm_list.rda")
+    writeLandmarks(lm_list,file=file_name)
     # lm_list <- runApp("alignR_all")
 
 
