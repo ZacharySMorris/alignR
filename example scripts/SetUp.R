@@ -1,4 +1,8 @@
+rm(list= ls())
+
 ### Loading packages ###
+
+
 
 library(geomorph)
 library(shiny)
@@ -17,8 +21,26 @@ library(tools)
 library(sp)
 library(crosstalk)
 
+
+# source functions --------------------------------------------------------
+
+
+
+AlignRfunctions <- file.path("./R", list.files("./R"))
+
+
+for(i in 1:length(AlignRfunctions)){
+  source(AlignRfunctions[i])
+}
+
+#not sure what this file does. When I run it just errors
+source("./alignR_ui.R")
+
+
+
+
 # spec.lo <- c("/Users/zach/Dropbox/AmniotePalateDiversity/Palatine_Meshes")
-spec.lo <- c("~/Dropbox/alignR/alignR/data/turts/input/")
+spec.lo <- c("./data/turts/input/")
 
 #This will be the ultimate wrapper for the function, which takes a file directory and then passes the list of objects to the app
 #Doesn't work just yet

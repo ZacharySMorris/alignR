@@ -1,6 +1,6 @@
 #### Making my own navbar UI ####
 
-addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www')
+addResourcePath(prefix = 'www', directoryPath = './www')
 
 fixed_ui <- fluidPage(
   useShinyjs(),

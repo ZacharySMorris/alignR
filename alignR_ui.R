@@ -1,6 +1,6 @@
 ### Automated Pseudolandmark Alignment App ###
 
-addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www')
+# addResourcePath(prefix = 'www', directoryPath = './www')
 
 alignR_ui <- fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
