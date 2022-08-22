@@ -127,6 +127,9 @@ alignR_server <- function(input, output, session) {
   observeEvent(input$clear, {
     clearLMs(input$n)
     tmp_values$coords <- NULL
+    output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
+    shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+    tmp_par <- alignRPar3d(input$par3d,1)
   })
 
 # Update the landmark selection menu based on the total number of landmarks selected in Lm_n
@@ -194,24 +197,24 @@ alignR_server <- function(input, output, session) {
   point_sizes <<- get('point_sizes', envir = .GlobalEnv)
 
   # output$spec_name <- renderUI({
-    # print(environmentName(globalenv()))
-  #   cur_sp_name <- names(sp_list)[[cur_sp()]]
-  #   # h4(cur_sp_name, style = "padding-left:20px; color:#fff")
-  #   h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
+  #   print(is.numeric(tmp_values$coords))
+  # #   cur_sp_name <- names(sp_list)[[cur_sp()]]
+  #   # h4(paste(class(tmp_values$coords)), style = "padding-left:20px; color:#fff")
+  #   # h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
   # })
 
-  output$cur_specimen <- renderUI({
-    # tags$style("
-    #     #cur_specimen ~ .selectize-input.full {
-    #         background-color: SlateGray;
-    #         border-color: SlateGray;
-    #         outline-color: SlateGray;
-    #         color: #fff;
-    #         font-size: 20px
-    #     }
-    #     ")
-    selectInput("cur_specimen", NULL, names(sp_list), width = "1000px")
-  })
+  # output$cur_specimen <- renderUI({
+  #   # tags$style("
+  #   #     #cur_specimen ~ .selectize-input.full {
+  #   #         background-color: SlateGray;
+  #   #         border-color: SlateGray;
+  #   #         outline-color: SlateGray;
+  #   #         color: #fff;
+  #   #         font-size: 20px
+  #   #     }
+  #   #     ")
+  #   selectInput("cur_specimen", NULL, names(sp_list), width = "1000px")
+  # })
 
   cur_sp <- reactive(grep(input$cur_specimen,names(sp_list)))
 
@@ -245,7 +248,8 @@ alignR_server <- function(input, output, session) {
 
     sharedData <<- rglShared(ids["data"])
 
-    shade3d(tmp_specimen$mesh, meshColor = "vertices", add = TRUE)
+    shade3d(tmp_specimen$mesh, override = TRUE, meshColor = "vertices", add = TRUE)
+    # light3d()
 
     temp_ids = ids3d("shapes")
     mesh_id = which(temp_ids[,2]=="triangles")
@@ -259,12 +263,19 @@ alignR_server <- function(input, output, session) {
     return(scene1)
   })
 
+  # rglwidget(scene1,
+  #           shared = sharedData,
+  #           shinyBrush = "rgl_3D_brush")
+
+  # ,lit=FALSE #can be used to turn of lighting on specific parts (maybe would make landmarks pop more?)
+
   # output$testing <- renderPrint({
-  #   print(current_lm())
+    # print(material3d("color", "alpha","lit","shininess"))
   # })
 
   output$SpecimenPlot <- renderRglwidget({
-    clear3d(type = "all") #gives us some weird issues with texture/lighting, but better than ever increasing brightness
+    # clear3d(type = "light") #gives us some weird issues with texture/lighting, but better than ever increasing brightness
+    clear3d()
     rgl.bg(color = "SlateGray")
 
     # if (!exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
@@ -275,12 +286,12 @@ alignR_server <- function(input, output, session) {
     } else{
         plot3d(MeshData(),add = TRUE)
 
-        if (class(tmp_values$coords) == "numeric"){
-          rgl.spheres(tmp_values$coords[1], tmp_values$coords[2], tmp_values$coords[3],
-                      radius = point_sizes[cur_sp()], color = c("#f1e180"), add = TRUE)
-        } else{
+        if (is.matrix(tmp_values$coords)){
           rgl.spheres(tmp_values$coords[,1], tmp_values$coords[,2], tmp_values$coords[,3],
-                      radius = point_sizes[cur_sp()], color = c("SteelBlue"), add = TRUE)
+                      radius = point_sizes[cur_sp()], color = c("Red"), add = TRUE) # SteelBlue
+        } else{
+          rgl.spheres(tmp_values$coords[1], tmp_values$coords[2], tmp_values$coords[3],
+                      radius = point_sizes[cur_sp()], color = c("Green"), add = TRUE) # #f1e180
         }
         rglwidget(scene3d(minimal = FALSE),
                   shared = sharedData,
@@ -290,26 +301,47 @@ alignR_server <- function(input, output, session) {
 
   observeEvent(input$getPar, {
     shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-    tmp_par <- alignRPar3d(input$par3d)
+    tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+    # tmp_zoom <- input$par3d$zoom
     # output$testing <- renderPrint({
-    #   cat(unlist(tmp_par), input$par3d$zoom, sep = "\n")
+    #   list(tmp_par[1],tmp_par$zoom)
     #   })
+
+    # updateSelectInput("mouseMode")
+    # rgl.setMouseCallbacks()
+
+    if (!isolate(input$NoWarnings)){
+      showToast(type = "warning",
+                message = "Now that the position is set, change mouse mode to 'landmarking' and select point to be landmarked in the rgl window. Click the button AFTER identifying the point in the rgl window.",
+                title = "Where is the landmark to be placed?",
+                keepVisible = TRUE,
+                .options = list(positionClass = "toast-top-center", closeButton = TRUE, progressBar = FALSE)
+      )
+    }
+
   })
 
 
   observeEvent(input$submitLM, {
     shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-    tmp_par <- alignRPar3d(input$par3d)
+    tmp_par <- alignRPar3d(input$par3d,zoom=input$par3d$zoom)
+    # tmp_zoom <- input$par3d$zoom
+    # tmp_par$proj <- tmp_par$proj*tmp_zoom
+
 
     if (is.nan(tmp_par$model) || all(tmp_par$model[,1]==0)){
       shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-      alignRPar3d(input$par3d)
+      alignRPar3d(input$par3d,zoom=input$par3d$zoom)
 
       click(id = "submitLM")
     } else {
 
     tmp_tris <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, input$rgl_3D_brush)
     tmp_values$coords <<- isolate(tmp_tris$coords)
+
+    # output$testing <- renderPrint({
+    #   list(tmp_par,tmp_tris)
+    # })
 
     if (!isolate(input$NoWarnings)){
       showToast(type = "warning",

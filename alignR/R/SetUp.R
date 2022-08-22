@@ -17,6 +17,16 @@ library(tools)
 library(sp)
 library(crosstalk)
 
+usethis::use_package("shiny")
+usethis::use_package("shinyjs")
+usethis::use_package("shinyFeedback")
+usethis::use_package("fontawesome")
+usethis::use_package("Morpho")
+usethis::use_package("tools")
+usethis::use_package("rgl")
+usethis::use_package("Rvcg")
+
+
 # spec.lo <- c("/Users/zach/Dropbox/AmniotePalateDiversity/Palatine_Meshes")
 spec.lo <- c("~/Dropbox/alignR/alignR/data/turts/input/")
 
@@ -26,15 +36,8 @@ alignR(file_dir = spec.lo, file_name = "TurtTest.txt")
 
 turt_test <- readLandmarks("TurtTest.txt")
 
-vert2points(scallopPLY$ply)
-apply(vert2points(scallopPLY$ply),2,mean)
-
-specimen <- scale(as.matrix(t(scallopPLY$ply$vb)[, -4]), scale = FALSE)
-spec$vb <- rbind(t(specimen), 1)
+rgl.setMouseCallbacks()
 
 
-test_matrix <- matrix(c(1,1,1,2,2,2,3,3,3,4,4,4,5,5,5,6,6,6),
-       ncol=3, byrow = T)
-colnames(test_matrix) <- c("X","Y","Z")
-lm_list[[2]] <- test_matrix
+
 

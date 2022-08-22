@@ -382,7 +382,17 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
 
       return(list("coords" = error_click,
                   "tris" = objtris,
-                  "error" = TRUE)
+                  "error" = TRUE,
+                  "user_click" = user_click,
+                  "win_centers" = win_centers,
+                  "win_verts" = win_verts,
+                  "tri_diff" = tri_diff,
+                  "tri_dist" = tri_dist,
+                  "tri_data" = tri_data,
+                  "tri_order" = tri_order,
+                  "tri_index" = tri_index,
+                  "tri.v" = tri.v,
+                  "objtris" = objtris)
       )
   } else {
     subtending.tri.ind <- t(sapply(tri_index[pt.inside.tri], FUN = function(X) X+c(0:2)))
@@ -419,7 +429,17 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
 
     return(list("coords" = c(clkpt),
                 "tris" = objtris,
-                "error" = FALSE)
+                "error" = FALSE,
+                "user_click" = user_click,
+                "win_centers" = win_centers,
+                "win_verts" = win_verts,
+                "tri_diff" = tri_diff,
+                "tri_dist" = tri_dist,
+                "tri_data" = tri_data,
+                "tri_order" = tri_order,
+                "tri_index" = tri_index,
+                "tri.v" = tri.v,
+                "objtris" = objtris)
     )
     }
 }
@@ -466,15 +486,15 @@ MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
 
 }
 
-alignRPar3d <- function(x){
+alignRPar3d <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
-  rgl.viewpoint(userMatrix = x$userMatrix)
+  rgl.viewpoint(userMatrix = x$userMatrix,zoom = zoom)
   tmp_par <- rgl.projection()
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
   # print(tmp_par)
   showElement(id = "submitLM")
-  hideElement(id = "getPar")
+  # hideElement(id = "getPar")
 
   return(tmp_par)
 }

@@ -1,6 +1,6 @@
 ### Automated Pseudolandmark Alignment App ###
 
-addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www')
+# addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www')
 
 alignR_ui <- fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
@@ -49,7 +49,8 @@ alignR_ui <- fluidPage(
     ),
     mainPanel(
       uiOutput("spec_name"),
-      uiOutput("cur_specimen"),
+      # uiOutput("cur_specimen"),
+      selectInput("cur_specimen", NULL, names(sp_list),width = "600px"), #is it ok to have the pointing to a specific named object in memory?
       verbatimTextOutput("testing", placeholder = FALSE),
       rglwidgetOutput("SpecimenPlot", width = "600px", height = "600px"),
       fluidRow(
@@ -60,8 +61,6 @@ alignR_ui <- fluidPage(
         actionButton("load", "Load", icon = icon("upload"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
         actionButton("save", "Save", icon = icon("save"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
         actionButton("quit", "Save & Quit", icon = icon("sign-out-alt"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
-        # uiOutput("cur_specimen"),
-        # selectInput("cur_specimen", NULL, names(sp_list)),
         align = "center"
       )
     )

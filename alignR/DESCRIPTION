@@ -1,11 +1,20 @@
 Package: alignR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Landmark digitizer for alignment of surface meshes
 Version: 0.1.0
-Author: Who wrote it
+Author: WZachary S. Morris & Blake Dickson
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    fontawesome,
+    Morpho,
+    rgl,
+    Rvcg,
+    shiny,
+    shinyFeedback,
+    shinyjs,
+    tools

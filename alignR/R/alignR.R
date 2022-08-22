@@ -15,10 +15,10 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
 
   #create list of files and specimen names
   file_list <- dir(file_dir, full.names = TRUE)
-  name_list <- file_path_sans_ext(dir(file_dir))
+  name_list <- tools::file_path_sans_ext(dir(file_dir))
 
   #file type check
-  file_chk <- file_ext(file_list) %in% file_type
+  file_chk <- tools::file_ext(file_list) %in% file_type
 
   if(!all(file_chk)){
     warning("alignR only accepts surface files (ply, stl, off) but the selected directory includes other filetypes. Only accepted types will be used.")
@@ -34,7 +34,7 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
     for (i in 1:length(file_list)){
       tmp_file <- file_list[i]
       tmp_name <- name_list[i]
-      tmp_mesh <- vcgImport(tmp_file)
+      tmp_mesh <- Rvcg::vcgImport(tmp_file)
 
       sp_list[[tmp_name]] <<- tmp_mesh
     }
