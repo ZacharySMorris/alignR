@@ -16,6 +16,7 @@ library(scales)
 library(tools)
 library(sp)
 library(crosstalk)
+library(rmarkdown)
 
 usethis::use_package("shiny")
 usethis::use_package("shinyjs")
@@ -34,10 +35,17 @@ spec.lo <- c("~/Dropbox/alignR/alignR/data/turts/input/")
 #Doesn't work just yet
 alignR(file_dir = spec.lo, file_name = "TurtTest.txt")
 
-turt_test <- readLandmarks("TurtTest.txt")
+turt_test <- readLandmarks("Write_Test.txt")
 
 rgl.setMouseCallbacks()
 
+##font awesome icon for R
+# <i class="fa-brands fa-r-project"></i>
 
+turt_test.gpa <- gpagen(turt_test)
 
+turt_test.gpa$coords
 
+turt_test.pca <- gm.prcomp(turt_test.gpa$coords)
+
+plot(turt_test.pca$x[,1],turt_test.pca$x[,2])

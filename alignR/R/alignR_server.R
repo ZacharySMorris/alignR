@@ -3,43 +3,13 @@ alignR_server <- function(input, output, session) {
   tab_n <- reactiveVal(1)
   stylesheets <- c("www/fixed.css","www/mixed.css","www/auto.css")
 
-  # rv <- reactiveValues()
-  # rv$setupComplete <- FALSE
-  #
-  # output$setupComplete <- reactive({
-  #   return(rv$setupComplete)
-  # })
-
   ## initialize UI
   output$header <- renderUI({
     tagList(
       tags$head(
         tags$link(rel = "stylesheet", type = "text/css", href = stylesheets[tab_n()]),
       ))
-
-    # rv$setupComplete <- TRUE
-
   })
-  ##
-  ## hide landmark number input if automated analysis selected
-  # if (tab_n()==3){
-  #   hide("n")
-  #
-  # }
-  # ##
-
-  ## initial Lm dropdown
-  # output$Lm_n <- renderUI({
-  #   tmp_n <- as.numeric(input$n)
-  #   tagList(
-  #     fluidRow(
-  #       h5("Landmark to digitize"),
-  #       align = "center",
-  #     ),
-  #     selectInput("Lm_n", NULL, tmp_n)
-  #   )
-  #     })
-  ##
 
   ## update UI based on analysis clicked
   ## need to add warnings about changing the UI after starting one kind of analysis and also function to clear data when changing analyses
@@ -81,6 +51,7 @@ alignR_server <- function(input, output, session) {
     # } else {
       updateNumericInput(session,inputId = "n", value = 10)
       showElement(id="n")
+      hideElement(id="auto_align")
       tab_n(1)
       shinyjs::disable('tab1')
       shinyjs::enable('tab2')
@@ -90,6 +61,7 @@ alignR_server <- function(input, output, session) {
   observeEvent(input$tab2,{
     updateNumericInput(session,inputId = "n", value = 10)
     showElement(id="n")
+    hideElement(id="auto_align")
     tab_n(2)
     shinyjs::enable('tab1')
     shinyjs::disable('tab2')
@@ -99,6 +71,7 @@ alignR_server <- function(input, output, session) {
   observeEvent(input$tab3,{
     updateNumericInput(session,inputId = "n", value = 6)
     hideElement(id="n")
+    showElement(id="auto_align")
     tab_n(3)
     shinyjs::enable('tab1')
     shinyjs::enable('tab2')
@@ -113,7 +86,8 @@ alignR_server <- function(input, output, session) {
     centers = NULL,
     tringles = NULL,
     cur_LM  = reactive(as.numeric(input$Lm_n)),
-    coords  = NULL
+    coords  = NULL,
+    orig_view = NULL
   )
 
   tmp_specimen <- NULL
@@ -123,14 +97,33 @@ alignR_server <- function(input, output, session) {
   spec_tri <- NULL
   tmp_coords <- NULL
   all_LMs <- NULL
+  orig_view <- NULL
 
   observeEvent(input$clear, {
-    clearLMs(input$n)
+    clearLMs(LM_values())
     tmp_values$coords <- NULL
-    output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
-    shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-    tmp_par <- alignRPar3d(input$par3d,1)
+    # output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
+    updateSelectInput(session,"cur_specimen",selected = names(sp_list)[isolate(cur_sp())])
+
+    # shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+    # tmp_par <- alignRPar3d(input$par3d,zoom=1)
+    # tmp_zoom <- input$par3d$zoom
+    # output$testing <- renderPrint({
+    #   list(tmp_par[1],tmp_zoom)
+    #   })
   })
+
+  # output$testing <- renderText({
+  #   ids3d()
+  # #   isolate(LM_values())
+  # #   # return(input$SetupComplete)
+  # # #   # validate(need(MeshData(),"MeshData() not found"))
+  # # #   # validate(need(isolate(output$SpecimenPlot),"MeshData() not found"))
+  # # #   return(cat(rv$setupComplete,!is.null(isolate(MeshData())),sep = "\n"))
+  # # #
+  #   })
+
+
 
 # Update the landmark selection menu based on the total number of landmarks selected in Lm_n
 # observeEvent(input$tab_n, {
@@ -147,12 +140,13 @@ alignR_server <- function(input, output, session) {
 ## could update to allow for a user to input a list of names for discrete landmarking rather than just numbers
   LM_values <- reactive({
     if (tab_n()==3){
-      clearLMs(6)
-      return(list("Top" = 1, "Bottom" = 2,"Front" = 3, "Back" = 4,"Right" = 5, "Left" = 6))
+      updateNumericInput(session, "n",value=6)
+      return(c("Top", "Bottom","Front", "Back","Right", "Left"))
+      # return(list("Top" = 1, "Bottom" = 2,"Front" = 3, "Back" = 4,"Right" = 5, "Left" = 6))
     } else {
       tmp_n <- as.numeric(input$n)
-      clearLMs(input$n)
-      return(c(1:tmp_n))
+      clearLMs(c(paste("LM ", 1:tmp_n, sep = "")))
+      return(c(paste("LM ", 1:tmp_n, sep = "")))
     }
   })
 ##
@@ -169,7 +163,24 @@ alignR_server <- function(input, output, session) {
   })
 ##
 
-  current_lm <- reactive(as.numeric(input$Lm_n))
+  current_lm <- reactive(as.numeric(match(input$Lm_n,LM_values())))
+
+
+
+  ## create dropdown menu to choose the landmark to digitize
+  output$auto_align <- renderUI({
+    tagList(
+      fluidRow(
+        em(h6("Perform once all specimens have alignment landmarks")),
+        align = "center",
+      ),
+      # actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("cube")),
+      # actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("magic")),
+      # actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("cubes")),
+      actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("object-ungroup"))
+    )
+  })
+  ##
 
 ## create dropdown menu to choose whether mouse is for rotating or landmarking
   output$plot_3D_mousemode <- renderUI({
@@ -181,7 +192,6 @@ alignR_server <- function(input, output, session) {
                    choices = c("trackball", "selecting"),
                    labels = c("Rotation", "Landmarking"),
                    stayActive = FALSE,
-                   # style = "outline-color:SlateGray;background-color:SlateGray;border-color:SlateGray;color:#fff"
           )),
       div(style="display:inline-block", actionButton("Last_Sp", "Previous specimen", icon = icon("arrow-alt-circle-left"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray")),
       div(style="display:inline-block", actionButton("Next_Sp", "Next specimen", icon = icon("arrow-alt-circle-right"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray")),
@@ -197,51 +207,73 @@ alignR_server <- function(input, output, session) {
   point_sizes <<- get('point_sizes', envir = .GlobalEnv)
 
   # output$spec_name <- renderUI({
-  #   print(is.numeric(tmp_values$coords))
-  # #   cur_sp_name <- names(sp_list)[[cur_sp()]]
-  #   # h4(paste(class(tmp_values$coords)), style = "padding-left:20px; color:#fff")
-  #   # h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
+  #   # output$value <- reactive({
+  #     verbatimTextOutput(
+  #       cat("The value of rv$setupComplete is:", isolate(rv$setupComplete),
+  #           "The value of !is.null(isolate(MeshData())) is:", !is.null(isolate(MeshData())),
+  #           "The value of output$setupComplete is:", isolate(output$setupComplete),
+  #           sep = "\n")
+  #     )
+    # })
+    # print(is.numeric(tmp_values$coords))
+  #   cur_sp_name <- names(sp_list)[[cur_sp()]]
+    # h4(paste(class(tmp_values$coords)), style = "padding-left:20px; color:#fff")
+    # h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
   # })
 
-  # output$cur_specimen <- renderUI({
-  #   # tags$style("
-  #   #     #cur_specimen ~ .selectize-input.full {
-  #   #         background-color: SlateGray;
-  #   #         border-color: SlateGray;
-  #   #         outline-color: SlateGray;
-  #   #         color: #fff;
-  #   #         font-size: 20px
-  #   #     }
-  #   #     ")
-  #   selectInput("cur_specimen", NULL, names(sp_list), width = "1000px")
-  # })
-
-  cur_sp <- reactive(grep(input$cur_specimen,names(sp_list)))
-
-  observeEvent(input$cur_specimen, {
-    loadLMs(lm_array, cur_sp(), as.numeric(input$n))
-    tmp_values$coords <- landmarks
+  output$cur_specimen <- renderUI({
+    # tags$style("
+    #     #cur_specimen ~ .selectize-input.full {
+    #         background-color: SlateGray;
+    #         border-color: SlateGray;
+    #         outline-color: SlateGray;
+    #         color: #fff;
+    #         font-size: 20px
+    #     }
+    #     ")
+    selectInput("cur_specimen", NULL, names(sp_list), width = "600px")
   })
 
+  cur_sp <- reactive({
+    if (is.null(input$cur_specimen)){
+      return(1)
+    }else{
+      grep(input$cur_specimen,names(sp_list))
+    }
+  })
+
+  observeEvent(input$cur_specimen, {
+    if(exists(names(lm_array)[[cur_sp()]],where=lm_array,mode="numeric")){
+      tmp_values$coords <- loadLMs(lm_array, cur_sp(), LM_values())
+    } else{
+      clearLMs(LM_values())
+      tmp_values$coords <- NULL
+    }
+
+    #I don't think this bit is set up properly to work yet, but want to use it to set up viewpoint when switching specimens...might need to go with the rglwidget section...
+    # if(!is.null(orig_view)){
+    #   shinySetPar3d(userMatrix = orig_view)
+    # }
+
+  })
 ##
 
-  #need to create an input that is the initial specimen value
-  # should use a hidden ui or reactiveValue?
-  # reactive{
-  #   spec_list <- sp_list
-  # }
+  #need a way to reset rgl viewpoint back to default...save initial value (non-reactive?)...but then how to reset it
+  # rgl.viewpoint(tmp_values$orig_view)
+  # par3d(userMatrix = tmp_values$orig_view)
 
-  open3d(useNULL = TRUE)
+  # open3d(useNULL = TRUE)
 
+  observe({
   ## Create base Specimen Plot in rglWidget object
-  MeshData <- reactive({
+  output$SpecimenPlot <- renderRglwidget({
 
     spec <-  sp_list[[cur_sp()]]
     tmp_specimen <<- MeshManager(spec)
 
     clear3d()
     rgl.bg(color = "SlateGray")
-    # rgl.open(useNULL =T) #this is something to help with not plotting separate rgl window, but it doesn't work yet...
+
     ids <- plot3d(tmp_specimen$specimen[, 1], tmp_specimen$specimen[, 2], tmp_specimen$specimen[, 3],
                   size = tmp_specimen$ptsize, aspect = FALSE, box = FALSE, axes = FALSE,
                   xlab = "",  ylab = "",  zlab = "")
@@ -249,7 +281,6 @@ alignR_server <- function(input, output, session) {
     sharedData <<- rglShared(ids["data"])
 
     shade3d(tmp_specimen$mesh, override = TRUE, meshColor = "vertices", add = TRUE)
-    # light3d()
 
     temp_ids = ids3d("shapes")
     mesh_id = which(temp_ids[,2]=="triangles")
@@ -258,33 +289,12 @@ alignR_server <- function(input, output, session) {
     centers <<- rgl.attrib(temp_ids[mesh_id,1], "centers")
     spec_tri <<- t(tmp_specimen$mesh$vb)[tmp_specimen$mesh$it,1:3]
 
-    scene1 <- scene3d(minimal = FALSE)
 
-    return(scene1)
-  })
-
-  # rglwidget(scene1,
-  #           shared = sharedData,
-  #           shinyBrush = "rgl_3D_brush")
-
-  # ,lit=FALSE #can be used to turn of lighting on specific parts (maybe would make landmarks pop more?)
-
-  # output$testing <- renderPrint({
-    # print(material3d("color", "alpha","lit","shininess"))
-  # })
-
-  output$SpecimenPlot <- renderRglwidget({
-    # clear3d(type = "light") #gives us some weird issues with texture/lighting, but better than ever increasing brightness
-    clear3d()
-    rgl.bg(color = "SlateGray")
-
-    # if (!exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
     if (is.null(tmp_values$coords)){
-      rglwidget(MeshData(),
+      rglwidget(scene3d(minimal = FALSE),
                 shared = sharedData,
                 shinyBrush = "rgl_3D_brush")
     } else{
-        plot3d(MeshData(),add = TRUE)
 
         if (is.matrix(tmp_values$coords)){
           rgl.spheres(tmp_values$coords[,1], tmp_values$coords[,2], tmp_values$coords[,3],
@@ -293,19 +303,54 @@ alignR_server <- function(input, output, session) {
           rgl.spheres(tmp_values$coords[1], tmp_values$coords[2], tmp_values$coords[3],
                       radius = point_sizes[cur_sp()], color = c("Green"), add = TRUE) # #f1e180
         }
+
         rglwidget(scene3d(minimal = FALSE),
                   shared = sharedData,
                   shinyBrush = "rgl_3D_brush")
-        }
+    }
+
     })
+  updateRadioButtons(session, "SetupComplete", selected = 'yes')
+  })
+
+  #can we make this dependent on the plot loading without making it reactive?
+    # shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+    # orig_view <- alignRPar3d(input$par3d, zoom = 1)$userMatrix
+
+
+
+  # ##landmark table output
+  # output$landmarks <- renderUI({
+  #   # if no landmarks in landmarks, coords, or lm_array
+  #   if (is.null(tmp_values$coords)||!exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
+  #     return()
+  #   }
+  #   #if coords exists
+  #   if(!is.null(tmp_values$coords)){
+  #     tmp_landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
+  #     tableOutput("tmp_landmarks")
+  #   }
+  #
+  #   if(is.null(tmp_values$coords)||is.null(landmarks)||exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
+  #     loadLMs(lm_array,isolate(cur_sp()), as.numeric(input$n))
+  #     # renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
+  #     tmp_landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
+  #     tableOutput("tmp_landmarks")
+  #   }
+  #
+  #   ##if coords / landmarks are empty, but lm_array exists with a matrix for any specimen
+  #   #output is an empty matrix matching existing specimens?
+  #   #output is an empty matrix matching LM number?
+  #
+  # })
+
+  ##landmark table output
+  output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {tmp_values$coords})
+
 
   observeEvent(input$getPar, {
     shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
     tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-    # tmp_zoom <- input$par3d$zoom
-    # output$testing <- renderPrint({
-    #   list(tmp_par[1],tmp_par$zoom)
-    #   })
 
     # updateSelectInput("mouseMode")
     # rgl.setMouseCallbacks()
@@ -324,10 +369,7 @@ alignR_server <- function(input, output, session) {
 
   observeEvent(input$submitLM, {
     shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-    tmp_par <- alignRPar3d(input$par3d,zoom=input$par3d$zoom)
-    # tmp_zoom <- input$par3d$zoom
-    # tmp_par$proj <- tmp_par$proj*tmp_zoom
-
+    tmp_par <- alignRPar3d(isolate(input$par3d),zoom=isolate(input$par3d$zoom))
 
     if (is.nan(tmp_par$model) || all(tmp_par$model[,1]==0)){
       shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
@@ -336,12 +378,11 @@ alignR_server <- function(input, output, session) {
       click(id = "submitLM")
     } else {
 
-    tmp_tris <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, input$rgl_3D_brush)
-    tmp_values$coords <<- isolate(tmp_tris$coords)
+    tmp_tris <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, isolate(input$rgl_3D_brush))
+    tmp_lm <- checkLMs(input$Lm_n, tmp_tris$coords)
+    # tmp_lm <- array(isolate(tmp_tris$coords), dim = c(1,3), dimnames = list(LM_values()[[as.numeric(input$Lm_n)]], c("X","Y","Z")))
+    tmp_values$coords <<- tmp_lm
 
-    # output$testing <- renderPrint({
-    #   list(tmp_par,tmp_tris)
-    # })
 
     if (!isolate(input$NoWarnings)){
       showToast(type = "warning",
@@ -363,18 +404,16 @@ alignR_server <- function(input, output, session) {
 
 ## if confirmed, save the specimen coords to landmarks and save rglwindow coords to vert list (invisible)
   observeEvent(input$confirmLM, {
-    current_lm <- as.numeric(input$Lm_n)
     tmp_LMs <- tmp_values$coords
 
-    saveLMs(input$n, current_lm, tmp_LMs)
-    output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
+    tmp_data <- saveLMs(lm_array, cur_sp(), current_lm(), LM_values(), tmp_LMs)
 
-    lm_array[[cur_sp()]] <<- landmarks
-    tmp_values$coords <- landmarks
+    lm_array[[cur_sp()]]  <<- tmp_data
+    tmp_values$coords <- tmp_data
 
-    if (current_lm < input$n){
-      next_lm <- current_lm + 1
-      updateSelectInput(session, "Lm_n", selected = next_lm)
+    if (current_lm() < input$n){
+      next_lm <- current_lm() + 1
+      updateSelectInput(session, "Lm_n", selected = LM_values()[next_lm])
     }
 
     hideElement(id = "submitLM")
@@ -389,74 +428,93 @@ alignR_server <- function(input, output, session) {
     #if save, then save
     #if do not save, then clear and load in next specimen landmarks
 
-
-    # if (!is.null(landmarks)) {
-    #   lm_array[[cur_sp()]] <<- landmarks
-    # }
-
       next_spec <- next.sp(cur_sp(),sp_n)
       if (exists(names(lm_array)[next_spec],where=lm_array,mode="numeric")){
-        clearLMs(input$n)
-        loadLMs(lm_array,next_spec, as.numeric(input$n))
-        tmp_values$coords <- landmarks
+        clearLMs(LM_values())
+        tmp_values$coords <- loadLMs(lm_array, next_spec, LM_values())
         } else{
-          clearLMs(input$n)
+          clearLMs(LM_values())
         }
-      output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
       updateSelectInput(session,"cur_specimen",selected = names(sp_list)[next_spec])
   })
 
   observeEvent(input$Last_Sp,{
-    # if (!is.null(landmarks)) {
-    #   lm_array[[cur_sp()]] <<- landmarks
 
     next_spec <- prev.sp(cur_sp(),sp_n)
     if (exists(names(lm_array)[next_spec],where=lm_array,mode="numeric")){
-      clearLMs(input$n)
-      loadLMs(lm_array,next_spec, as.numeric(input$n))
-      tmp_values$coords <- landmarks
+      clearLMs(LM_values())
+      tmp_values$coords <- loadLMs(lm_array,next_spec, LM_values())
       }else{
-        clearLMs(input$n)
+        clearLMs(LM_values())
       }
-    output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
     updateSelectInput(session,"cur_specimen",selected = names(sp_list)[next_spec])
   })
 
   observeEvent(input$Next_LM,{
-    current_lm <- as.numeric(input$Lm_n)
-
-    if (current_lm < input$n){
-      next_lm <- current_lm + 1
+   if (current_lm() < input$n){
+      next_lm <- current_lm() + 1
       updateSelectInput(session, "Lm_n", selected = next_lm)
     }
     # click("goLM")
   })
 
   observeEvent(input$Last_LM,{
-    current_lm <- as.numeric(input$Lm_n)
-
-    if (current_lm > 1){
-      next_lm <- current_lm - 1
+     if (current_lm() > 1){
+      next_lm <- current_lm() - 1
       updateSelectInput(session, "Lm_n", selected = next_lm)
     }
     # click("goLM")
   })
 
   observeEvent(input$load, {
-    file_load <<- file.choose()
-    lm_array <<- readLandmarks(file_load)
 
-    loadLMs(lm_array, cur_sp(), as.numeric(input$n))
+    if (any(!is.na(lm_array)) || !is.null(tmp_values$coords)){
+      shinyalert(
+        html = TRUE,
+        text = tagList(
+          h3("Loading data will overwrite existing landmarks."),
+          h4("Do you still want to proceed?"),
+        ),
 
-    output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {
-      printLMs()
-    })
+        # .sweet-alert button:active {box-shadow:inset 0 3px 5px rgba(0,0,0,.125) !important;}
+        #
+        #
+        #
+        # .sweet-alert button {color: #fff; background-color: Red !important; border-color: SlateGray; outline-color: SlateGray;}
+        #     .sweet-alert button:hover {color: #fff; background-color: Red;  border-color: SlateGray; outline-color: SlateGray!important;}
+        #         .sweet-alert button:focus {color: #fff; background-color: Red; border-color: SlateGray; outline-color: SlateGray;box-shadow:none !important;}
+        #             .sweet-alert button:active {background-color: Red !important; border-color: SlateGray; outline-color: SlateGray; box-shadow:inset 0 3px 5px rgba(0,0,0,.125) !important;}
+        #
+        #           .sweet-alert .btn:active {box-shadow:inset 0 3px 5px rgba(0,0,0,.125)
+            size = "xs",
+            closeOnEsc = FALSE,
+            closeOnClickOutside = FALSE,
+            type = "warning",
+            showConfirmButton = TRUE,
+            showCancelButton = TRUE,
+            confirmButtonText = "Yes!",
+            # confirmButtonCol = "#F8BB86",
+            cancelButtonText = "No!",
+            timer = 0,
+            animation = TRUE,
+            callbackR = function(x) {
+              # print(x)
+              if(x){
+                file_load <- file.choose()
+                lm_array  <<- suppressWarnings(readLandmarks(file_load))
+                tmp_values$coords <- loadLMs(lm_array, cur_sp(), LM_values())
 
-    tmp_values$coords <- landmarks
+              }
+        })
+    }else{
+      file_load <- file.choose()
+      lm_array  <<- suppressWarnings(readLandmarks(file_load))
+      tmp_values$coords <- loadLMs(lm_array, cur_sp(), LM_values())
+    }
   })
 
   observeEvent(input$save, {
-    lm_array[[cur_sp()]] <<- landmarks
+    lm_array[[cur_sp()]] <- tmp_values$coords
     # assign('lm_list', lm_array, envir = .GlobalEnv)
     # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
     # save(lm_array,file="lm_list.rda")
@@ -464,7 +522,7 @@ alignR_server <- function(input, output, session) {
     })
 
   observeEvent(input$quit, {
-    lm_array[[cur_sp()]] <<- landmarks
+    lm_array[[cur_sp()]] <- tmp_values$coords
     # assign('lm_list', lm_array, envir = .GlobalEnv)
     # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
     # save(lm_array,file="lm_list.rda")
@@ -482,3 +540,101 @@ alignR_server <- function(input, output, session) {
 
 }
 
+
+
+# reactive({showModal(startupModal())})
+
+# rv <- reactiveValues()
+# rv$setupComplete <- FALSE
+#
+# setupComplete <- reactiveVal(FALSE)
+
+# startupModal <- function() {
+#       modalDialog(
+#         {tagList(
+#           h2("Loading dataset..."),
+#           tags$link(rel = "stylesheet", type = "text/css", href = c("www/startup.css"))
+#         )},
+#                   title = NULL,
+#                   footer = NULL,
+#                   size = "l",
+#                   easyClose = TRUE,
+#                   fade = FALSE)
+#   }
+
+# observeEvent(input$SetupComplete, {
+#   # if(input$SetupComplete == 'no'){
+#   #   showModal(startupModal())
+#   # } else {
+#     # removeModal()
+#   # }
+#   showModal(startupModal())
+#   if(input$SetupComplete == 'yes'){
+#     removeModal()
+#   }
+#     # else {
+#   #   showModal(startupModal())
+#   # }
+# # } else {if(input$SetupComplete == 'yes'){removeModal()}
+# # }
+# })
+
+# observe(
+#   if(input$SetupComplete == 'no'){startupModal()}
+#   else {if(input$SetupComplete == 'yes'){removeModal()}}
+# )
+
+# observeEvent(input$SetupComplete,{
+#   rv$setupComplete <- TRUE
+#   setupComplete(TRUE)
+#   return(cat(input$SetupComplete,isolate(setupComplete())))
+#   rv <<- reactiveValues(setupComplete = TRUE)
+#
+#   removeModal()
+# })
+
+# observeEvent(input$SetupComplete, {
+
+# output$hide_panel <- eventReactive(input$SetupComplete, TRUE, ignoreInit = TRUE)
+
+# outputOptions(output, "hide_panel", suspendWhenHidden = FALSE)
+
+# observeEvent(input$SetupComplete,{
+#   shinyjs::show("cp1")
+# })
+
+# observeEvent(input$SetupComplete,{
+#   shinyjs::hide("cp1")
+#   removeModal()
+# })
+
+# output$setupComplete <- reactive({
+#   cat(input$SetupComplete)
+#   return(input$SetupComplete)
+#   outputOptions(output, 'setupComplete', suspendWhenHidden=FALSE)
+# })
+
+# if(isolate(setupComplete())==TRUE){
+#   removeModal()
+# }      # else{
+# showModal(startupModal())
+# }
+
+
+
+# })
+
+# output$setupComplete <- reactive({
+#   if(isolate(rv$setupComplete)==TRUE){
+#     removeModal()
+#   }else{
+#     showModal(startupModal())
+#   }
+#   return(rv$setupComplete)
+#   })
+
+# setupComplete <- reactive({
+#   if(isolate(rv$setupComplete)==TRUE){
+#     removeModal()
+#     }
+# })

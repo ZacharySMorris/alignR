@@ -1,32 +1,46 @@
 ### Automated Pseudolandmark Alignment App ###
 
-# addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www')
+addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www') #this line is needed to find the right css files...not sure how to make it correct for R package
 
 alignR_ui <- fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
   useShinyjs(),
-  #useShinyalert(),
+  useShinyalert(),
   useShinyFeedback(),
+  tags$head(HTML("<title>landmark alignR</title>")), #Without company logo
+  #tags$head(HTML("<title>landmark alignR</title> <link rel='icon' type='image/gif/png' href='alignR_logo.png'>")), #WIth company logo
   uiOutput("header"),
-  # conditionalPanel(condition = "!output.setupComplete",
-  #                  wellPanel( title = "loading")),
+  conditionalPanel(condition = "input.SetupComplete == 'no'",
+                   tags$style(
+                     HTML('body {background-color: SlateGray; border-color: SlateGray;}
+                        #LoadMessage {color: #fff; background-color: SlateGray; border-color: SlateGray;padding:100px;}')
+                   ),
+                   fluidRow(id="LoadMessage",
+                            h2("Loading dataset..."),
+                            img(src="www/Alligator_FS18e_MaxillaryProliferation.gif", width='500px'),
+                            align = "center",),
+                   ),
+  conditionalPanel(condition = "input.SetupComplete == 'yes'",
   titlePanel(
     tagList(wellPanel(class = "header",
                       div(style="display:inline-block;", h5("landmark alignR", class = "logo"),
                           # div(style="display:inline-block;",
                           actionButton("tab1","Discrete Landmark Analysis"),
                           actionButton("tab2","Mixed Landmarking"),
-                          actionButton("tab3","Automated Pseudolandmark Alignment")
+                          actionButton("tab3","Automated Pseudolandmark Alignment"),
                       ))
     )),
+  # conditionalPanel(condition = "input.SetupComplete == 'yes'",
   sidebarLayout(
     sidebarPanel(class = "sidebar",
                  numericInput("n", "Number of fixed landmarks", value=10, step=1),
                  uiOutput("Lm_n"),
+                 # uiOutput("curLM"),
                  fluidRow(
                    actionButton("getPar", "Set Position", icon = icon("sliders")),
                    hidden(actionButton("submitLM", "Landmark!", icon = icon("crosshairs"))),
                    hidden(actionButton("confirmLM", "Confirm", icon = icon("check-circle"))),
+                   # actionButton("auto_align","Align Surface Landmarks!", icon = icon("cube")),
                    align = "center",
                  ),
                  fluidRow(
@@ -43,14 +57,23 @@ alignR_ui <- fluidPage(
                    align = "center",
                  ),
                  fluidRow(
+                   hidden(uiOutput("auto_align")),
+                   align = "center",
+                 ),
+                 fluidRow(
                    checkboxInput("NoWarnings", "Do not remind me to confirm landmark selections.", value = FALSE, width = NULL),
                    align = "center",
                  ),
+                 fluidRow(
+                   hidden(radioButtons(inputId = "SetupComplete", label = NULL, choices = c('yes','no'),selected = 'no')),
+                   align = "center",
+                 ),
+
     ),
     mainPanel(
       uiOutput("spec_name"),
-      # uiOutput("cur_specimen"),
-      selectInput("cur_specimen", NULL, names(sp_list),width = "600px"), #is it ok to have the pointing to a specific named object in memory?
+      uiOutput("cur_specimen"),
+      # selectInput("cur_specimen", NULL, names(sp_list),width = "600px"), #is it ok to have the pointing to a specific named object in memory?
       verbatimTextOutput("testing", placeholder = FALSE),
       rglwidgetOutput("SpecimenPlot", width = "600px", height = "600px"),
       fluidRow(
@@ -58,14 +81,16 @@ alignR_ui <- fluidPage(
         align = "center"
       ),
       fluidRow(
-        actionButton("load", "Load", icon = icon("upload"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
-        actionButton("save", "Save", icon = icon("save"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
-        actionButton("quit", "Save & Quit", icon = icon("sign-out-alt"), style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"),
+        actionButton("load", "Load", icon = icon("upload")),
+        actionButton("save", "Save", icon = icon("save")),
+        actionButton("quit", "Save & Quit", icon = icon("sign-out-alt")),
         align = "center"
       )
     )
+    )
   )
 )
+# )
 
 # , style = "color: #fff; background-color: SlateGray; border-color: SlateGray; outline-color: SlateGray"
 #

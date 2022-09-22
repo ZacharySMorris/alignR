@@ -21,7 +21,7 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
   file_chk <- tools::file_ext(file_list) %in% file_type
 
   if(!all(file_chk)){
-    warning("alignR only accepts surface files (ply, stl, off) but the selected directory includes other filetypes. Only accepted types will be used.")
+    warning(immediate. = TRUE, "alignR only accepts surface files (ply, stl, off) but the selected directory includes other filetypes. Only accepted types will be used.")
   }
 
   #create list of specimen names and file directories
