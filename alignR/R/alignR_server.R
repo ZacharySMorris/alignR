@@ -289,7 +289,6 @@ alignR_server <- function(input, output, session) {
     centers <<- rgl.attrib(temp_ids[mesh_id,1], "centers")
     spec_tri <<- t(tmp_specimen$mesh$vb)[tmp_specimen$mesh$it,1:3]
 
-
     if (!is.null(tmp_values$coords)){
         if (is.matrix(tmp_values$coords)){
           rgl.spheres(tmp_values$coords[,1], tmp_values$coords[,2], tmp_values$coords[,3],
