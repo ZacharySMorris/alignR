@@ -74,8 +74,6 @@ writeLandmarks <- function(x, file, ind=0){
 readLandmarks <- function(x){
   #x is the name of an alignR landmarks file
 
-  # x<-c("Write_Test.txt")
-
   file <- readLines(x)
   lines <- sub("\t", "", file)
   id_names <- gsub("<|>","",grep("<[[:alnum:]|_.]+[._|>]", lines,value=T)) #grabs specimen names and removes extra text
@@ -93,7 +91,7 @@ readLandmarks <- function(x){
     tmp_rows <- seq(tmp_ends[1]+1,tmp_ends[2]-1)
     tmp_lines <- lines[tmp_rows] #save single specimen lines
     if(length(tmp_lines)==1 && "NA"==tmp_lines){
-      landmark_df[[tmp_id]] <- tmp_lines
+      landmark_df[[tmp_id]] <- NA
       next
     }
     tmp_data <- grep("^<type|^\t",tmp_lines,value=T,invert=T) #subset to the rows with landmark data + rownames

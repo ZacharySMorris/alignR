@@ -1,3 +1,12 @@
+##Functions for working within alignR's shiny environment
+
+# #function for controlling app loading screen
+# load_data <- function() {
+#   Sys.sleep(2)
+#   hide("loading_page")
+#   show("main_content")
+# }
+
 ###Function to add coordinates to data.frame
 
 changeAnalysis <- function(current_tab, next_tab){
@@ -39,33 +48,42 @@ changeAnalysis <- function(current_tab, next_tab){
   }
 
 
-saveLMs <- function(n,current_lm,keep) {
-  if (exists("landmarks")){
-    landmarks[as.numeric(current_lm),] <<- keep
+saveLMs <- function(lm_data,current_sp,current_lm,lm_labels,keep) {
+  if (exists(names(lm_data)[current_sp],where=lm_data,mode="numeric")){
+    landmarks <- lm_data[[current_sp]]
+    landmarks[current_lm,] <- keep
   } else{
-    landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(paste("LM", 1:n, sep = "")), c("X","Y","Z")))
-    landmarks[as.numeric(current_lm),] <<- keep
+    n <- length(lm_labels)
+    landmarks <- array(NA, dim = c(n,3), dimnames = list(lm_labels, c("X","Y","Z")))
+    landmarks[current_lm,] <- keep
   }
+  return(landmarks)
 }
 
-loadLMs <- function(x,current_sp,n) {
-  if (exists(names(x)[current_sp],where=x,mode="numeric")){
-    landmarks <<- x[[current_sp]]
+loadLMs <- function(lm_data,current_sp,lm_labels) {
+  n <- length(lm_labels)
+  if (exists(names(lm_data)[current_sp],where=lm_data,mode="numeric")){
+    landmarks <- lm_data[[current_sp]]
   } else {
-    landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(paste("LM", 1:n, sep = "")), c("X","Y","Z")))
+    landmarks <- array(NA, dim = c(n,3), dimnames = list(c(lm_labels), c("X","Y","Z")))
   }
+  return(landmarks)
 }
 
-printLMs <- function() {
-  if (exists("landmarks")) {
-    landmarks
-  }
+checkLMs <- function(current_lm,check) {
+  landmarks <- array(check, dim = c(1,3), dimnames = list(current_lm, c("X","Y","Z")))
+  return(landmarks)
 }
 
-clearLMs <- function(n){
-  # if (exists("landmarks")){
-    landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(paste("LM", 1:n, sep = "")), c("X","Y","Z")))
-  # }
+# printLMs <- function() {
+#   if (exists("landmarks")) {
+#     return(landmarks)
+#   }
+# }
+
+clearLMs <- function(lm_labels){
+  n <- length(lm_labels)
+  landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(lm_labels), c("X","Y","Z")))
 }
 
 
@@ -121,7 +139,7 @@ write.lms <- function (landmarks,x){
 ###make a function that adds landmark points and updates rgl window
 
 
-
+##I don't remember why I made this...
 rgl.landmarking <- function(x, temp_scene, specimen) {
   current_lm <- as.numeric(x)
 
@@ -383,16 +401,17 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
       return(list("coords" = error_click,
                   "tris" = objtris,
                   "error" = TRUE,
-                  "user_click" = user_click,
-                  "win_centers" = win_centers,
-                  "win_verts" = win_verts,
-                  "tri_diff" = tri_diff,
-                  "tri_dist" = tri_dist,
-                  "tri_data" = tri_data,
-                  "tri_order" = tri_order,
-                  "tri_index" = tri_index,
-                  "tri.v" = tri.v,
-                  "objtris" = objtris)
+                  # "user_click" = user_click,
+                  # "win_centers" = win_centers,
+                  # "win_verts" = win_verts,
+                  # "tri_diff" = tri_diff,
+                  # "tri_dist" = tri_dist,
+                  # "tri_data" = tri_data,
+                  # "tri_order" = tri_order,
+                  # "tri_index" = tri_index,
+                  # "tri.v" = tri.v,
+                  # "objtris" = objtris
+                  )
       )
   } else {
     subtending.tri.ind <- t(sapply(tri_index[pt.inside.tri], FUN = function(X) X+c(0:2)))
@@ -429,17 +448,18 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
 
     return(list("coords" = c(clkpt),
                 "tris" = objtris,
-                "error" = FALSE,
-                "user_click" = user_click,
-                "win_centers" = win_centers,
-                "win_verts" = win_verts,
-                "tri_diff" = tri_diff,
-                "tri_dist" = tri_dist,
-                "tri_data" = tri_data,
-                "tri_order" = tri_order,
-                "tri_index" = tri_index,
-                "tri.v" = tri.v,
-                "objtris" = objtris)
+                "error" = FALSE
+                # "user_click" = user_click,
+                # "win_centers" = win_centers,
+                # "win_verts" = win_verts,
+                # "tri_diff" = tri_diff,
+                # "tri_dist" = tri_dist,
+                # "tri_data" = tri_data,
+                # "tri_order" = tri_order,
+                # "tri_index" = tri_index,
+                # "tri.v" = tri.v,
+                # "objtris" = objtris
+                )
     )
     }
 }
@@ -488,7 +508,7 @@ MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
 
 alignRPar3d <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
-  rgl.viewpoint(userMatrix = x$userMatrix,zoom = zoom)
+  rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
   tmp_par <- rgl.projection()
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
