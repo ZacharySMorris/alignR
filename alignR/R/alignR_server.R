@@ -262,7 +262,7 @@ alignR_server <- function(input, output, session) {
   # rgl.viewpoint(tmp_values$orig_view)
   # par3d(userMatrix = tmp_values$orig_view)
 
-  # open3d(useNULL = TRUE)
+  open3d(useNULL = TRUE)
 
   observe({
   ## Create base Specimen Plot in rglWidget object
@@ -302,44 +302,19 @@ alignR_server <- function(input, output, session) {
                   shared = rglShared(ids["data"]),
                   shinyBrush = "rgl_3D_brush")
 
+
     })
   updateRadioButtons(session, "SetupComplete", selected = 'yes')
   })
 
-  #can we make this dependent on the plot loading without making it reactive?
-    # shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-    # orig_view <- alignRPar3d(input$par3d, zoom = 1)$userMatrix
-
-
-
-  # ##landmark table output
-  # output$landmarks <- renderUI({
-  #   # if no landmarks in landmarks, coords, or lm_array
-  #   if (is.null(tmp_values$coords)||!exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
-  #     return()
-  #   }
-  #   #if coords exists
-  #   if(!is.null(tmp_values$coords)){
-  #     tmp_landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
-  #     tableOutput("tmp_landmarks")
-  #   }
-  #
-  #   if(is.null(tmp_values$coords)||is.null(landmarks)||exists(names(lm_array)[cur_sp()],where=lm_array,mode="numeric")){
-  #     loadLMs(lm_array,isolate(cur_sp()), as.numeric(input$n))
-  #     # renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
-  #     tmp_landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
-  #     tableOutput("tmp_landmarks")
-  #   }
-  #
-  #   ##if coords / landmarks are empty, but lm_array exists with a matrix for any specimen
-  #   #output is an empty matrix matching existing specimens?
-  #   #output is an empty matrix matching LM number?
-  #
-  # })
-
   ##landmark table output
   output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {tmp_values$coords})
 
+  ##Text to try putting landmarks as an "add to scene"
+  # currentSubscene3d(dev = cur3d())
+  # useSubscene3d(subscene)
+  # addToSubscene3d(ids, subscene = currentSubscene3d())
+  # delFromSubscene3d(ids, subscene = currentSubscene3d())
 
   observeEvent(input$getPar, {
     shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
