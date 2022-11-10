@@ -8,15 +8,13 @@ jscode <- "shinyjs.init = function() {
     document.getElementById('SpecimenPlot').addEventListener('contextmenu', event => event.preventDefault());
   }"
 
-
-
 alignR_ui <- shiny::fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
-  useShinyjs(),
-  extendShinyjs(text = jscode, functions = c()),
+  shinyjs::useShinyjs(),
+  shinyjs::extendShinyjs(text = jscode, functions = c()),
   # useShinyalert(),
-  useShinyFeedback(),
-  tags$head(HTML("<title>landmark alignR</title>")), #Without company logo
+  shinyFeedback::useShinyFeedback(),
+  htmltools::tags$head(HTML("<title>landmark alignR</title>")), #Without company logo
   #tags$head(HTML("<title>landmark alignR</title> <link rel='icon' type='image/gif/png' href='alignR_logo.png'>")), #WIth company logo
   uiOutput("header"),
   conditionalPanel(condition = "input.SetupComplete == 'no'",
