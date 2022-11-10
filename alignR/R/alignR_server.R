@@ -1,7 +1,7 @@
 alignR_server <- function(input, output, session) {
 
   tab_n <- reactiveVal(1)
-  stylesheets <- c("www/fixed.css","www/mixed.css","www/auto.css")
+  stylesheets <- c("fixed.css","mixed.css","auto.css")
 
   ## initialize UI
   output$header <- renderUI({
