@@ -1,12 +1,12 @@
 ### Automated Pseudolandmark Alignment App ###
 
-# addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www') #this line is needed to find the right css files...not sure how to make it correct for R package
+shiny::addResourcePath(prefix = 'www', directoryPath = '~/www') #this line is needed to find the right css files...not sure how to make it correct for R package
 
 jscode <- "shinyjs.init = function() {
     document.getElementById('SpecimenPlot').addEventListener('contextmenu', event => event.preventDefault());
   }"
 
-alignR_ui <- fluidPage(
+alignR_ui <- shiny::fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
   useShinyjs(),
   extendShinyjs(text = jscode, functions = c()),
