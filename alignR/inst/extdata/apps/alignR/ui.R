@@ -44,8 +44,8 @@ alignR_ui <- shiny::fluidPage(
                  # uiOutput("curLM"),
                  fluidRow(
                    actionButton("getPar", "Set Position", icon = icon("sliders")),
-                   hidden(actionButton("submitLM", "Landmark!", icon = icon("crosshairs"))),
-                   hidden(actionButton("confirmLM", "Confirm", icon = icon("circle-check"))),
+                   shinyjs::hidden(actionButton("submitLM", "Landmark!", icon = icon("crosshairs"))),
+                   shinyjs::hidden(actionButton("confirmLM", "Confirm", icon = icon("circle-check"))),
                    # actionButton("auto_align","Align Surface Landmarks!", icon = icon("cube")),
                    align = "center",
                  ),
@@ -63,7 +63,7 @@ alignR_ui <- shiny::fluidPage(
                    align = "center",
                  ),
                  fluidRow(
-                   hidden(uiOutput("auto_align")),
+                   shinyjs::hidden(uiOutput("auto_align")),
                    align = "center",
                  ),
                  fluidRow(
@@ -71,7 +71,7 @@ alignR_ui <- shiny::fluidPage(
                    align = "center",
                  ),
                  fluidRow(
-                   hidden(radioButtons(inputId = "SetupComplete", label = NULL, choices = c('yes','no'),selected = 'no')),
+                   shinyjs::hidden(radioButtons(inputId = "SetupComplete", label = NULL, choices = c('yes','no'),selected = 'no')),
                    align = "center",
                  ),
 
