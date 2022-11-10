@@ -1,6 +1,6 @@
 ### Automated Pseudolandmark Alignment App ###
 
-# addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www') #this line is needed to find the right css files...not sure how to make it correct for R package
+addResourcePath(prefix = 'www', directoryPath = '~/www') #this line is needed to find the right css files...not sure how to make it correct for R package
 
 jscode <- "shinyjs.init = function() {
     document.getElementById('SpecimenPlot').addEventListener('contextmenu', event => event.preventDefault());
