@@ -14,7 +14,7 @@ alignR_ui <- shiny::fluidPage(
   shinyjs::extendShinyjs(text = jscode, functions = c()),
   # useShinyalert(),
   shinyFeedback::useShinyFeedback(),
-  htmltools::tags$head(HTML("<title>landmark alignR</title>")), #Without company logo
+  tags$head(HTML("<title>landmark alignR</title>")), #Without company logo
   #tags$head(HTML("<title>landmark alignR</title> <link rel='icon' type='image/gif/png' href='alignR_logo.png'>")), #WIth company logo
   uiOutput("header"),
   conditionalPanel(condition = "input.SetupComplete == 'no'",
