@@ -44,7 +44,7 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
     names(lm_list) <<- name_list
 
     #create a list of specimen centroid sizes
-    cs_list <- sapply(sp_list,cSize)
+    cs_list <- sapply(sp_list,Morpho::cSize)
     point_sizes <<- (cs_list / min(cs_list)) * 0.2
 
     # run shiny application to capture landmarks
