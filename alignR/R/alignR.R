@@ -1,7 +1,5 @@
 ### alignR function wrapper ###
 
-requireNamespace("shiny")
-
 alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
   #file_dir is a file directory where surface files are located on user's computer
   #loadAll is a logical value determining whether all surface files should be loaded into a list or if they should be loaded only as needed for digitizing
@@ -50,5 +48,7 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
     point_sizes <<- (cs_list / min(cs_list)) * 0.2
 
     # run shiny application to capture landmarks
-    shinyApp(alignR_ui, alignR_server)
+    app_dir <- paste0(path.package("alignR"), "/extdata/apps/digitizeImages")
+    runApp(app_dir)
+    # shinyApp(alignR_ui, alignR_server)
 }
