@@ -111,4 +111,4 @@ shinyApp(alignR_ui, alignR_server)
 # wellPanel(style = "max-height:50px;max-width:fit-content;padding:0000;color: #fff; background-color: #648f7b; border-color: #648f7b",
 #           actionButton("tab2","Mixed Landmarking",style = "color: #fff; background-color: #648f7b; border-color: #648f7b")
 # ),
-;outline-color: Steelblue
+#;outline-color: Steelblue
