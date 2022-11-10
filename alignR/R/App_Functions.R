@@ -518,3 +518,96 @@ alignRPar3d <- function(x,zoom){
 
   return(tmp_par)
 }
+
+alignRListen <- function(x,zoom){
+  #x should be input$par3d which has been updated via shinyGetPar3d
+  rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
+  int <- rgl.projection()
+  init$pos <- c(x/int$viewport[3], 1 - y/int$viewport[4], 0.5)
+  # tmp_par$zoom <- x$zoom
+  # print("cur_par output:")
+  # print(tmp_par)
+  showElement(id = "submitLM")
+  # hideElement(id = "getPar")
+
+  return(int)
+}
+
+# shiny_listeners <- reactive{
+#   shinyGetPar3d(c("listeners"), session)
+#   return(input$par3d$listeners) #assign "listeners" to value
+# }
+#
+# observe{
+#   shinyGetPar3d(c("scale","listeners","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+#   tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+#
+#   start_int <<- alignRListen(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+#
+#
+#   setUserCallbacks("right",
+#                    begin = begin <- function(x, y) {
+#                      shinyGetPar3d(c("scale","listeners","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+#                      tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+#                      start_int <<- alignRListen(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+#                      },
+#                    update =   update <- function(x, y) {
+#                        init <- start_int
+#                        xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
+#                        mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
+#                        par3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = sub )
+#                      }
+#                    )
+# }
+#
+#
+#
+#
+#
+#
+# pan3d <- function(button, dev = cur3d(), subscene = currentSubscene3d(dev)) {
+#   start <- list()
+#
+#   begin <- function(x, y) {
+#     activeSubscene <- par3d("activeSubscene", dev = dev) #get activeSubscene
+#     print(activeSubscene)
+#     start$listeners <<- par3d("listeners", dev = dev, subscene = activeSubscene) #assign "listeners" to value, but it is actually just a number for the subscene?
+#     # print(unlist(start$listeners))
+#     print(sub, start$listeners)
+#     for (sub in "SpecimenPlot") {
+#       init <- par3d(c("userProjection","viewport"), dev = dev, subscene = sub) #get user projections and viewport in the subscrene in listners
+#       init$pos <- c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5)
+#       start[[as.character(sub)]] <<- init
+#     }
+#   }
+#
+#   update <- function(x, y) {
+#     for (sub in "SpecimenPlot") {
+#       init <- start[[as.character(sub)]]
+#       xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
+#       mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
+#       par3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = sub )
+#     }
+#   }
+#
+#   list(rglbegin = begin, rglupdate = update)
+#
+#   rgl.setMouseCallbacks(button, begin, update, dev = dev, subscene = subscene)
+#   HTML("document.getElementById(this.attributes.rglSceneId.value).rglinstance.\n                   setMouseMode(this.value, \n                                button = parseInt(this.attributes.rglButton.value), \n                                subscene = parseInt(this.attributes.rglSubscene.value),\n                                stayActive = parseInt(this.attributes.rglStayActive.value))")
+#   # changecode <- "document.getElementById(this.attributes.rglSceneId.value).rglinstance.\n                   setMouseMode(this.value, \n                                button = parseInt(this.attributes.rglButton.value), \n                                subscene = parseInt(this.attributes.rglSubscene.value),\n                                stayActive = parseInt(this.attributes.rglStayActive.value))"
+#   # result <- tags$select(tagList(options), onchange = HTML(changecode),
+#   #                       rglButton = button, rglSubscene = subscene, rglStayActive = as.numeric(stayActive),
+#   #                       ...)
+#   cat("Callbacks set on button", button, "of RGL device", dev, "in subscene", subscene, "\n")
+# }
+# open3d()
+# shade3d(icosahedron3d(), col = "yellow")
+# # This only works in the internal display...
+# pan3d(2)
+#
+#
+# "document.getElementById(SpecimenPlot).rglinstance.
+# setMouseMode(selecting,
+#              button = 2,
+#              subscene = SpecimenPlot,
+#              stayActive = parseInt(this.attributes.rglStayActive.value))"

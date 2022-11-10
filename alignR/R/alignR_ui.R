@@ -1,11 +1,16 @@
 ### Automated Pseudolandmark Alignment App ###
 
-addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www') #this line is needed to find the right css files...not sure how to make it correct for R package
+# addResourcePath(prefix = 'www', directoryPath = '~/Dropbox/alignR/alignR/www') #this line is needed to find the right css files...not sure how to make it correct for R package
+
+jscode <- "shinyjs.init = function() {
+    document.getElementById('SpecimenPlot').addEventListener('contextmenu', event => event.preventDefault());
+  }"
 
 alignR_ui <- fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
   useShinyjs(),
-  useShinyalert(),
+  extendShinyjs(text = jscode, functions = c()),
+  # useShinyalert(),
   useShinyFeedback(),
   tags$head(HTML("<title>landmark alignR</title>")), #Without company logo
   #tags$head(HTML("<title>landmark alignR</title> <link rel='icon' type='image/gif/png' href='alignR_logo.png'>")), #WIth company logo
@@ -24,6 +29,7 @@ alignR_ui <- fluidPage(
   titlePanel(
     tagList(wellPanel(class = "header",
                       div(style="display:inline-block;", h5("landmark alignR", class = "logo"),
+                          # tags$i(class="fa-brands fa-r-project"),
                           # div(style="display:inline-block;",
                           actionButton("tab1","Discrete Landmark Analysis"),
                           actionButton("tab2","Mixed Landmarking"),
@@ -39,13 +45,13 @@ alignR_ui <- fluidPage(
                  fluidRow(
                    actionButton("getPar", "Set Position", icon = icon("sliders")),
                    hidden(actionButton("submitLM", "Landmark!", icon = icon("crosshairs"))),
-                   hidden(actionButton("confirmLM", "Confirm", icon = icon("check-circle"))),
+                   hidden(actionButton("confirmLM", "Confirm", icon = icon("circle-check"))),
                    # actionButton("auto_align","Align Surface Landmarks!", icon = icon("cube")),
                    align = "center",
                  ),
                  fluidRow(
-                   actionButton("Last_LM", "Previous LM", icon = icon("arrow-circle-left")),
-                   actionButton("Next_LM", "Next LM", icon = icon("arrow-circle-right")),
+                   actionButton("Last_LM", "Previous LM", icon = icon("circle-arrow-left")),
+                   actionButton("Next_LM", "Next LM", icon = icon("circle-arrow-right")),
                    align = "center",
                  ),
                  fluidRow(
@@ -82,8 +88,8 @@ alignR_ui <- fluidPage(
       ),
       fluidRow(
         actionButton("load", "Load", icon = icon("upload")),
-        actionButton("save", "Save", icon = icon("save")),
-        actionButton("quit", "Save & Quit", icon = icon("sign-out-alt")),
+        actionButton("save", "Save", icon = icon("floppy-disk")),
+        actionButton("quit", "Save & Quit", icon = icon("right-from-bracket")),
         align = "center"
       )
     )

@@ -49,3 +49,9 @@ turt_test.gpa$coords
 turt_test.pca <- gm.prcomp(turt_test.gpa$coords)
 
 plot(turt_test.pca$x[,1],turt_test.pca$x[,2])
+
+
+#amniote palate testing
+spec.lo <- c("~/Desktop/PalateMeshes/input/")
+spec.lo <- c("~/Desktop/PalateMeshes/test")
+alignR(file_dir = spec.lo, file_name = "AmnioteTest.txt")
