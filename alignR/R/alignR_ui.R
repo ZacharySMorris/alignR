@@ -6,6 +6,8 @@ jscode <- "shinyjs.init = function() {
     document.getElementById('SpecimenPlot').addEventListener('contextmenu', event => event.preventDefault());
   }"
 
+
+
 alignR_ui <- shiny::fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
   useShinyjs(),
