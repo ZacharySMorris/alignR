@@ -113,16 +113,16 @@ alignR_server <- function(input, output, session) {
     #   })
   })
 
-  output$testing <- renderText({
-    start_int
-    # is.matrix(tmp_values$coords)
-  #   isolate(LM_values())
-  #   # return(input$SetupComplete)
-  # #   # validate(need(MeshData(),"MeshData() not found"))
-  # #   # validate(need(isolate(output$SpecimenPlot),"MeshData() not found"))
-  # #   return(cat(rv$setupComplete,!is.null(isolate(MeshData())),sep = "\n"))
-  # #
-    })
+  # output$testing <- renderText({
+  #   start_int
+  #   # is.matrix(tmp_values$coords)
+  # #   isolate(LM_values())
+  # #   # return(input$SetupComplete)
+  # # #   # validate(need(MeshData(),"MeshData() not found"))
+  # # #   # validate(need(isolate(output$SpecimenPlot),"MeshData() not found"))
+  # # #   return(cat(rv$setupComplete,!is.null(isolate(MeshData())),sep = "\n"))
+  # # #
+  #   })
 
 
 
