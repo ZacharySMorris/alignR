@@ -34,7 +34,7 @@ changeAnalysis <- function(current_tab, next_tab){
       if(x){
 
         updateNumericInput(session,inputId = "n", value = 10)
-        showElement(id="n")
+        shinyjs::showElement(id="n")
         tab_n(next_tab)
         shinyjs::disable(paste("tab", next_tab, sep = ""))
         shinyjs::enable('tab2')
@@ -513,7 +513,7 @@ alignRPar3d <- function(x,zoom){
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
   # print(tmp_par)
-  showElement(id = "submitLM")
+  shinyjs::showElement(id = "submitLM")
   # hideElement(id = "getPar")
 
   return(tmp_par)
@@ -527,7 +527,7 @@ alignRListen <- function(x,zoom){
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
   # print(tmp_par)
-  showElement(id = "submitLM")
+  shinyjs::showElement(id = "submitLM")
   # hideElement(id = "getPar")
 
   return(int)

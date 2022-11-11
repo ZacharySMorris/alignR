@@ -434,9 +434,9 @@ alignR_server <- function(input, output, session) {
                 )
     }
 
-    showElement(id = "confirmLM")
-    hideElement(id = "submitLM")
-    showElement(id = "getPar")
+    shinyjs::showElement(id = "confirmLM")
+    shinyjs::hideElement(id = "submitLM")
+    shinyjs::showElement(id = "getPar")
 
     }
 
@@ -457,9 +457,9 @@ alignR_server <- function(input, output, session) {
       updateSelectInput(session, "Lm_n", selected = LM_values()[next_lm])
     }
 
-    hideElement(id = "submitLM")
-    hideElement(id = "confirmLM")
-    showElement(id = "getPar")
+    shinyjs::hideElement(id = "submitLM")
+    shinyjs::hideElement(id = "confirmLM")
+    shinyjs::showElement(id = "getPar")
 
   })
 
