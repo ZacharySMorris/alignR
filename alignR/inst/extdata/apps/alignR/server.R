@@ -50,8 +50,8 @@ alignR_server <- function(input, output, session) {
     # })
     # } else {
       updateNumericInput(session,inputId = "n", value = 10)
-      showElement(id="n")
-      hideElement(id="auto_align")
+      shinyjs::showElement(id="n")
+      shinyjs::hideElement(id="auto_align")
       tab_n(1)
       shinyjs::disable('tab1')
       shinyjs::enable('tab2')
@@ -60,8 +60,8 @@ alignR_server <- function(input, output, session) {
   })
   observeEvent(input$tab2,{
     updateNumericInput(session,inputId = "n", value = 10)
-    showElement(id="n")
-    hideElement(id="auto_align")
+    shinyjs::showElement(id="n")
+    shinyjs::hideElement(id="auto_align")
     tab_n(2)
     shinyjs::enable('tab1')
     shinyjs::disable('tab2')
@@ -70,8 +70,8 @@ alignR_server <- function(input, output, session) {
 
   observeEvent(input$tab3,{
     updateNumericInput(session,inputId = "n", value = 6)
-    hideElement(id="n")
-    showElement(id="auto_align")
+    shinyjs::hideElement(id="n")
+    shinyjs::showElement(id="auto_align")
     tab_n(3)
     shinyjs::enable('tab1')
     shinyjs::enable('tab2')
