@@ -6,16 +6,6 @@ writeLandmarks <- function(x, file, ind=0){
 
   # x = lm_list
 
-  print(paste(class(x) == "list",
-              is.null(x[[name]]),
-              class(x[[name]]) == "logical",
-              class(x[[name]]) == c('matrix',"array"),
-              any(unlist(lapply(x,class)) == "logical") || !all(unlist(sapply(x,class)) == c("matrix","array")),
-              file != "",
-              sep = "\n"
-              )
-        )
-
   if(length(x) == 0) return()
 
   str <- '' #create blank XML string to be built up
@@ -64,7 +54,7 @@ writeLandmarks <- function(x, file, ind=0){
 
     }
 
-    if (any(unlist(lapply(x,class)) == "logical") || !all(unlist(sapply(x,class)) == c("matrix","array"))){
+    if (any(unlist(lapply(x,class)) == "logical") | !all(unlist(sapply(x,class)) == c("matrix","array"))){
       warning("Some specimens lack a matrix of landmark data.")
       }
 
@@ -77,14 +67,6 @@ writeLandmarks <- function(x, file, ind=0){
 
   if(file != "") write(str, file)
 
-  print(paste(class(x) == "list",
-              is.null(x[[name]]),
-              class(x[[name]]) == "logical",
-              class(x[[name]]) == c('matrix',"array"),
-              any(unlist(lapply(x,class)) == "logical") || !all(unlist(sapply(x,class)) == c("matrix","array")),
-              file != "",
-              sep = "\n"
-  )
   )
 
 }
