@@ -572,7 +572,6 @@ alignR_server <- function(input, output, session) {
     # assign('lm_list', lm_array, envir = .GlobalEnv)
     # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
     # save(lm_array,file="lm_list.rda")
-
     writeLandmarks(lm_array,file_name)
     })
 
