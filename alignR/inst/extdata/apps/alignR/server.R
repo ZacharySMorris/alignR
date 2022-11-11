@@ -397,7 +397,7 @@ alignR_server <- function(input, output, session) {
     # rgl.setMouseCallbacks()
 
     if (!isolate(input$NoWarnings)){
-      showToast(type = "warning",
+      shinyFeedback::showToast(type = "warning",
                 message = "Now that the position is set, change mouse mode to 'landmarking' and select point to be landmarked in the rgl window. Click the button AFTER identifying the point in the rgl window.",
                 title = "Where is the landmark to be placed?",
                 keepVisible = TRUE,
@@ -426,7 +426,7 @@ alignR_server <- function(input, output, session) {
 
 
     if (!isolate(input$NoWarnings)){
-      showToast(type = "warning",
+      shinyFeedback::showToast(type = "warning",
                 message = "Click confirm or select again.",
                 title = "Is this landmark correctly placed?",
                 keepVisible = TRUE,
