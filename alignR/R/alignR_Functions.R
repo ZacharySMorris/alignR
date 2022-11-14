@@ -64,8 +64,9 @@ writeLandmarks <- function(x, file, ind=0){
 
   # str <- paste(sub("\n$","",str), collapse='')
   str <- sub("\n$", "", paste(str, collapse=''))
+  cat(str)
 
-  if(file != "") write(str, file)
+  # if(file != "") write(str, file)x
 
 }
 #
