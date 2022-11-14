@@ -54,9 +54,9 @@ writeLandmarks <- function(x, file, ind=0){
 
     }
 
-    if (any(unlist(lapply(x,class)) == "logical") | !all(unlist(sapply(x,class)) == c("matrix","array"))){
-      warning("Some specimens lack a matrix of landmark data.")
-      }
+    # if (any(unlist(lapply(x,class)) == "logical") | !all(unlist(sapply(x,class)) == c("matrix","array"))){
+    #   warning("Some specimens lack a matrix of landmark data.")
+    #   }
 
   # if(class(x) == "array"){
   #
@@ -66,8 +66,6 @@ writeLandmarks <- function(x, file, ind=0){
   str <- sub("\n$", "", paste(str, collapse=''))
 
   if(file != "") write(str, file)
-
-  )
 
 }
 #
