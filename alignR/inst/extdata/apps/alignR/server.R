@@ -555,6 +555,14 @@ alignR_server <- function(input, output, session) {
     }
   })
 
+  output$downloadData <- downloadHandler(
+    filename = file_name,
+    content = function(file) {
+      lm_array[[cur_sp()]] <- tmp_values$coords
+      writeLandmarks(lm_array,file_name)
+    }
+  )
+
   observeEvent(input$save, {
     lm_array[[cur_sp()]] <- tmp_values$coords
     # cat(any(sapply(lm_array,is.logical)), all(sapply(lm_array,is.array)), file_name)

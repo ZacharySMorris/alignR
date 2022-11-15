@@ -88,6 +88,7 @@ alignR_ui <- shiny::fluidPage(
       ),
       fluidRow(
         actionButton("load", "Load", icon = icon("upload")),
+        downloadButton("downloadData", "Download"),
         actionButton("save", "Save", icon = icon("floppy-disk")),
         actionButton("quit", "Save & Quit", icon = icon("right-from-bracket")),
         align = "center"
