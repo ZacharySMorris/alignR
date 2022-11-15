@@ -18,13 +18,13 @@ writeLandmarks <- function(x, file, ind=0){
 
       if(is.null(x[[name]])) next
 
-      if(class(x[[name]]) == "logical") {
+      if(is.logical(x[[name]])) {
         str <- c(str, paste(paste(rep('\t', ind), collapse=''), '<', name,'>\n', sep = ""))
         str <- c(str, paste("NA\n"))
         str <- c(str, paste(paste(rep('\t', ind), collapse=''), '</', name,'>\n', sep = ""))
       }
 
-      if(class(x[[name]]) == c('matrix',"array")){
+      if(is.array(x[[name]])){
         if(!is.null(rownames(x[[name]])) || is.null(colnames(x[[name]]))){
           row_names <- rownames(x[[name]])
           col_names <- colnames(x[[name]])
@@ -54,19 +54,15 @@ writeLandmarks <- function(x, file, ind=0){
 
     }
 
-    # if (any(unlist(lapply(x,class)) == "logical") | !all(unlist(sapply(x,class)) == c("matrix","array"))){
-    #   warning("Some specimens lack a matrix of landmark data.")
-    #   }
-
-  # if(class(x) == "array"){
-  #
-  # }
+    # if (any(unlist(lapply(x,class)) == "logical") | !all(unlist(sapply(x,class)) == "array")){
+    if (any(sapply(lm_array,is.logical)) | !all(sapply(x,is.array))){
+      warning("Some specimens lack a matrix of landmark data.")
+      }
 
   # str <- paste(sub("\n$","",str), collapse='')
   str <- sub("\n$", "", paste(str, collapse=''))
-  cat(str)
 
-  # if(file != "") write(str, file)x
+  if(file != "") write(str, file)
 
 }
 #

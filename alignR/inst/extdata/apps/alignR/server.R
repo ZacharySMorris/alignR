@@ -556,19 +556,8 @@ alignR_server <- function(input, output, session) {
 
   observeEvent(input$save, {
     lm_array[[cur_sp()]] <- tmp_values$coords
-
-  #   output$spec_name <- renderUI({
-  #     cat(class(lm_array) == "list",
-  #           names(lm_array),
-  #               is.null(lm_array[[6]]),
-  #               class(lm_array[[6]]) == "logical",
-  #               class(lm_array[[6]]) == c('matrix',"array"),
-  #               any(unlist(lapply(lm_array,class)) == "logical") | !all(unlist(sapply(lm_array,class)) == c("matrix","array")),
-  #               sep = "\n"
-  #   )
-  # })
-
-
+    # cat(any(sapply(lm_array,is.logical)), all(sapply(lm_array,is.array)), file_name)
+    # cat(class(lm_array[[1]]), is.array(lm_array[[1]]), is.matrix(lm_array[[1]]), any(class(lm_array[[1]]) == 'array'))
     # assign('lm_list', lm_array, envir = .GlobalEnv)
     # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
     # save(lm_array,file="lm_list.rda")
@@ -583,7 +572,6 @@ alignR_server <- function(input, output, session) {
     writeLandmarks(lm_array,file_name)
     warnings()
     stopApp()
-
   })
 
 
