@@ -202,6 +202,7 @@ alignR_server <- function(input, output, session) {
 
 ## create object to contain the current specimen number and load in specimen list
   file_name <<- get('file_name', envir = .GlobalEnv)
+  file_dir <<- get('file_dir', envir = .GlobalEnv)
   sp_list <<- get('sp_list', envir = .GlobalEnv)
   lm_array <<- get('lm_list', envir = .GlobalEnv)
   sp_n <<- length(sp_list)
@@ -561,7 +562,8 @@ alignR_server <- function(input, output, session) {
     # assign('lm_list', lm_array, envir = .GlobalEnv)
     # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
     # save(lm_array,file="lm_list.rda")
-    writeLandmarks(lm_array,file_name)
+    file_location <- file.path(file_dir, file_name)
+    writeLandmarks(lm_array,file_location)
     })
 
   observeEvent(input$quit, {
@@ -569,7 +571,8 @@ alignR_server <- function(input, output, session) {
     # assign('lm_list', lm_array, envir = .GlobalEnv)
     # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
     # save(lm_array,file="lm_list.rda")
-    writeLandmarks(lm_array,file_name)
+    file_location <- file.path(file_dir, file_name)
+    writeLandmarks(lm_array,file_location)
     warnings()
     stopApp()
   })

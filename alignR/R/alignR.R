@@ -48,7 +48,7 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
     point_sizes <<- (cs_list / min(cs_list)) * 0.2
 
     # run shiny application to capture landmarks
-    app_dir <- paste0(path.package("alignR"), "/extdata/apps/alignR")
+    app_dir <- file.path(path.package("alignR"), "extdata", "apps", "alignR")
     runApp(app_dir)
     # shinyApp(alignR_ui, alignR_server)
 }
