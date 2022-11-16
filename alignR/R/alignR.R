@@ -3,7 +3,7 @@
 alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
   #file_dir is a file directory where surface files are located on user's computer
   #loadAll is a logical value determining whether all surface files should be loaded into a list or if they should be loaded only as needed for digitizing
-   file_dir <- file_dir
+   file_dir <<- file_dir
    loadAll <- loadAll
    file_name <<- file_name
 
@@ -49,6 +49,6 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
 
     # run shiny application to capture landmarks
     app_dir <- file.path(path.package("alignR"), "extdata", "apps", "alignR")
-    runApp(app_dir)
+    shiny::runApp(appDir = app_dir)
     # shinyApp(alignR_ui, alignR_server)
 }

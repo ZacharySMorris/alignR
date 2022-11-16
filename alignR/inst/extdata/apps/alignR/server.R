@@ -559,7 +559,7 @@ alignR_server <- function(input, output, session) {
     filename = file_name,
     content = function(file) {
       lm_array[[cur_sp()]] <- tmp_values$coords
-      writeLandmarks(lm_array,file_name)
+      writeLandmarks(lm_array,file)
     }
   )
 
