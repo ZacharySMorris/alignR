@@ -21,3 +21,16 @@ However, the mixed landmark version of alignR may be the most powerful. After di
 analysis fills the surface around the fixed landmarks with pseudolandmarks. The discrete landmarks increase the speed of fitting specimens (as with 
 pseudo_lm), but then are retained in the resulting dataset. This allows for comparisons of the full 3D shape and key landmarks, while also resolving the 
 issue of density of landmarks which make joint analysis theoretically or pragmatically problematic in other implementations.
+
+
+## Installation
+
+The package can be installed using devtools using the following code:
+```
+devtools::install_github("ZacharySMorris/alignR", force = T)
+library(alignR)
+```
+To run the interactive landmarking app you need to specify the directory of appropriate mesh files and a file name for saving landmark data.
+```
+alignR(file_dir = file.dir, file_name = "example.txt")
+```
