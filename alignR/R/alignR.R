@@ -1,5 +1,5 @@
 ### alignR function wrapper ###
-
+#' @export
 alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
   #file_dir is a file directory where surface files are located on user's computer
   #loadAll is a logical value determining whether all surface files should be loaded into a list or if they should be loaded only as needed for digitizing
