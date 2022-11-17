@@ -146,7 +146,7 @@ rgl.landmarking <- function(x, temp_scene, specimen) {
   LM_ids <- temp_scene[["objects"]][[1]]["id"]
 
   keep <- ans <- NULL
-  keep <- selectpoints3d(LM_ids, value = FALSE, button = "right")[2]
+  keep <- rgl::selectpoints3d(LM_ids, value = FALSE, button = "right")[2]
 
   return(keep)
 }
@@ -269,7 +269,7 @@ shinyClickLine <- function(par_input, shinyBrush){
   dbl_click <- c(tmp_click,tmp_click)
   tmp_matrix <- cbind(matrix(dbl_click,ncol = 2, byrow = T), c(0,1))
 
-  win_line <- rgl.window2user(x=tmp_matrix, projection = tmp_proj)
+  win_line <- rgl::rgl.window2user(x=tmp_matrix, projection = tmp_proj)
 
   return(list("clickpoint" = tmp_matrix[1,], "clickline" = win_line, "proj" = tmp_proj))
 }
@@ -301,12 +301,12 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
   # print("inside tmp_proj:")
   # print(tmp_proj)
 
-  user_click <- rgl.window2user(x=click_matrix, projection = tmp_proj)
+  user_click <- rgl::rgl.window2user(x=click_matrix, projection = tmp_proj)
   colnames(user_click) <- c("x", "y", "z")
   ##
   ## convert centers and verts of triangles to window coordinate values
-  win_centers <- rgl.user2window(x=tmp_centers, projection = tmp_proj) #extracts the window coordinates that correspond to the centers given the projection
-  win_verts <- rgl.user2window(x=tmp_tris, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
+  win_centers <- rgl::rgl.user2window(x=tmp_centers, projection = tmp_proj) #extracts the window coordinates that correspond to the centers given the projection
+  win_verts <- rgl::rgl.user2window(x=tmp_tris, projection = tmp_proj) #extracts the window coordinates that correspond to the vertices of the shape given the projection
   if(is.vector(win_centers)){
     win_centers = t(as.matrix(win_centers))
   }
@@ -367,7 +367,7 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
     cur_tri <- tri_index[i] + c(0:2)
     X <- win_verts[cur_tri,]
 
-    cur_ans <- point.in.polygon(sgl_click[1], sgl_click[2], X[,1], X[,2])
+    cur_ans <- sp::point.in.polygon(sgl_click[1], sgl_click[2], X[,1], X[,2])
 
     pt.inside.tri[[i]] <- cur_ans == 1
     pt.inside.tri_values[[i]] <- cur_ans
@@ -395,7 +395,7 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
       #           .options = list(positionClass = "toast-top-center", closeButton = TRUE, progressBar = FALSE)
       # )
 
-      error_click <- rgl.window2user(x=cbind(0.5,0.5,0.5), projection = tmp_proj)
+      error_click <- rgl::rgl.window2user(x=cbind(0.5,0.5,0.5), projection = tmp_proj)
       colnames(error_click) <- c("x", "y", "z")
 
       return(list("coords" = error_click,
@@ -433,7 +433,7 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
     }
 
     # CALC CLK COORDS
-    decomptri<- prcomp(as.matrix(clktri))
+    decomptri<- stats::prcomp(as.matrix(clktri))
     pcvect <- as.data.frame(predict(decomptri,user_click))
 
     a = pcvect[1,]
@@ -508,8 +508,8 @@ MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
 
 alignRPar3d <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
-  rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
-  tmp_par <- rgl.projection()
+  rgl::rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
+  tmp_par <- rgl::rgl.projection()
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
   # print(tmp_par)
@@ -521,8 +521,8 @@ alignRPar3d <- function(x,zoom){
 
 alignRListen <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
-  rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
-  int <- rgl.projection()
+  rgl::rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
+  int <- rgl::rgl.projection()
   init$pos <- c(x/int$viewport[3], 1 - y/int$viewport[4], 0.5)
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")

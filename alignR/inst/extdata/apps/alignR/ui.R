@@ -1,4 +1,7 @@
 ### Automated Pseudolandmark Alignment App ###
+#' @import shiny
+#' @import shinyjs
+#' @import shinyFeedback
 #' @importFrom rgl rglwidgetOutput
 #'
 # shiny::addResourcePath(prefix = 'www', directoryPath = '~/www') #this line is needed to find the right css files...not sure how to make it correct for R package
@@ -7,7 +10,7 @@ jscode <- "shinyjs.init = function() {
     document.getElementById('SpecimenPlot').addEventListener('contextmenu', event => event.preventDefault());
   }"
 
-alignR_ui <- shiny::fluidPage(
+ui <- shiny::fluidPage(
   # withSpinner(rglwidgetOutput("SpecimenPlot"), type = 6, color = "#4682B4E6", color.background ="SlateGray", size = 2),
   shinyjs::useShinyjs(),
   shinyjs::extendShinyjs(text = jscode, functions = c()),
@@ -82,7 +85,7 @@ alignR_ui <- shiny::fluidPage(
       uiOutput("cur_specimen"),
       # selectInput("cur_specimen", NULL, names(sp_list),width = "600px"), #is it ok to have the pointing to a specific named object in memory?
       verbatimTextOutput("testing", placeholder = FALSE),
-      rglwidgetOutput("SpecimenPlot", width = "600px", height = "600px"),
+      rgl::rglwidgetOutput("SpecimenPlot", width = "600px", height = "600px"),
       fluidRow(
         uiOutput("plot_3D_mousemode"),
         align = "center"
