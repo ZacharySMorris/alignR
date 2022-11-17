@@ -1,0 +1,80 @@
+<Amyda_cartilaginea_R-MCZHERP_R-1632>
+<type=matrix rownames=LM 1,LM 2,LM 3,LM 4,LM 5,LM 6,LM 7,LM 8,LM 9,LM 10 colnames=X,Y,Z nrow=10 ncol=3>
+		X	Y	Z
+	LM 1	6.73730824501544	2.47820742846231	7.87924632711869
+	LM 2	NA	NA	NA
+	LM 3	NA	NA	NA
+	LM 4	NA	NA	NA
+	LM 5	NA	NA	NA
+	LM 6	NA	NA	NA
+	LM 7	NA	NA	NA
+	LM 8	NA	NA	NA
+	LM 9	NA	NA	NA
+	LM 10	NA	NA	NA
+</Amyda_cartilaginea_R-MCZHERP_R-1632>
+<Apalone_mutica_mutica_MCZHERP_R-182897>
+NA
+</Apalone_mutica_mutica_MCZHERP_R-182897>
+<Batagur_baska_MCZ_29577>
+NA
+</Batagur_baska_MCZ_29577>
+<Caretta_caretta_MCZHERP_R-179704>
+NA
+</Caretta_caretta_MCZHERP_R-179704>
+<Chelonia_mydas_MCZ_R-46619>
+NA
+</Chelonia_mydas_MCZ_R-46619>
+<Chelonoidis_denticulata_MCZ_R4442>
+NA
+</Chelonoidis_denticulata_MCZ_R4442>
+<Chelonoidis_nigra_MCZ_R-11070>
+NA
+</Chelonoidis_nigra_MCZ_R-11070>
+<Chitra_indica_MCZHERP_R-29486>
+NA
+</Chitra_indica_MCZHERP_R-29486>
+<Clemmys_guttata_MCZ53279>
+NA
+</Clemmys_guttata_MCZ53279>
+<Cuora_flavomarginata_MCZ_55838>
+NA
+</Cuora_flavomarginata_MCZ_55838>
+<Deirochelys_reticularia_MCZ15887>
+NA
+</Deirochelys_reticularia_MCZ15887>
+<Eretmochelys_imbricata_MCZHERP_R-190361>
+NA
+</Eretmochelys_imbricata_MCZHERP_R-190361>
+<Glyptemys_insculpta_MCZ145865>
+NA
+</Glyptemys_insculpta_MCZ145865>
+<Lepidochelys_kempii_MCZHERP_R-176757>
+NA
+</Lepidochelys_kempii_MCZHERP_R-176757>
+<Malaclemys_terrapin_MCZ182815>
+NA
+</Malaclemys_terrapin_MCZ182815>
+<Melanochelys_trijuga_MCZ_13193>
+NA
+</Melanochelys_trijuga_MCZ_13193>
+<Nissonia_hurum_MCZHERP_R-61475>
+NA
+</Nissonia_hurum_MCZHERP_R-61475>
+<Platysternon_megacephalum_MCZ_134397>
+NA
+</Platysternon_megacephalum_MCZ_134397>
+<Pseudemys_concinna_MCZ12764>
+NA
+</Pseudemys_concinna_MCZ12764>
+<Sacalia_bealei_MCZ_182858>
+NA
+</Sacalia_bealei_MCZ_182858>
+<Terrapene_carolina_MCZ56039>
+NA
+</Terrapene_carolina_MCZ56039>
+<Terrapene_coahuila_MCZ120335>
+NA
+</Terrapene_coahuila_MCZ120335>
+<Testudo_graeca_MCZ_R18161>
+NA
+</Testudo_graeca_MCZ_R18161>
