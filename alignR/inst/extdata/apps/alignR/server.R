@@ -310,40 +310,56 @@ alignR_server <- function(input, output, session) {
       }}
 
     shinyPan3d <- local({
-      # dev = cur3d()
-      # subscene = currentSubscene3d(dev)
+      dev = cur3d()
+      subscene = currentSubscene3d(dev)
       start <- list()
       begin <- function(x, y) {
       # activeSubscene <- par3d("activeSubscene", dev = dev) #get activeSubscene
       # start$listeners <<- par3d("listeners", dev = dev, subscene = activeSubscene) #assign "listeners" to value, but it is actually just a number for the subscene?
       # for (sub in start$listeners) {
-      #   init <- par3d(c("userProjection","viewport"), dev = dev, subscene = sub) #get user projections and viewport in the subscrene in listners
-      #   init$pos <- c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5)
-      #   start[[as.character(sub)]] <<- init
+        init <- par3d(c("userProjection","viewport"), dev = dev, subscene = subscene) #get user projections and viewport in the subscrene in listners
+        init$pos <- c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5)
+        start[[as.character(sub)]] <<- init
+        start_int <<- init
       # }
-          shinyGetPar3d(c("scale","listeners","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-          tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-          start_int <<- alignRListen(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-          print(start_int)
+          # shinyGetPar3d(c("scale","listeners","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+          # tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+          # start_int <<- alignRListen(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+          # print(start_int)
         }
 
       update <- function(x, y) {
-        for (sub in start$listeners) {
-          init <- start[[as.character(sub)]]
-          xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
-          mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
-          par3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = sub )
-        }
-        # init <- start_int
-        # xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
-        # mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
-        # shinySetPar3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = "SpecimenPlot" )
+        # for (sub in start$listeners) {
+        #   init <- start[[as.character(sub)]]
+        #   xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
+        #   mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
+        #   par3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = sub )
+        # }
+        init <- start_int
+        xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
+        mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
+        shinySetPar3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = "SpecimenPlot" )
       }
       list(rglbegin = begin, rglupdate = update)
     })
 
     rglbegin <- shinyPan3d$rglbegin
     rglupdate <- shinyPan3d$rglupdate
+
+    dev <- cur3d()
+    subscene <- currentSubscene3d(dev)
+    start <- list()
+      activeSubscene <- par3d("activeSubscene", dev = dev) #get activeSubscene
+      shinyGetPar3d(c("activeSubscene"), session)
+      start$listeners <- par3d("listeners", dev = dev) #assign "listeners" to value, but it is actually just a number for the subscene?
+
+      init <- par3d(c("userProjection","viewport"), dev = dev, subscene = subscene) #get user projections and viewport in the subscrene in listners
+      # init$pos <- c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5)
+      # start[[as.character(sub)]] <<- init
+
+      # output$testing <- renderText({
+      #   paste(dev, activeSubscene, subscene, start, init)
+      # })
 
     # Install both
     setUserCallbacks("right",
@@ -555,7 +571,7 @@ alignR_server <- function(input, output, session) {
     }
   })
 
-  output$downloadData <- downloadHandler(
+  output$save <- downloadHandler(
     filename = file_name,
     content = function(file) {
       lm_array[[cur_sp()]] <- tmp_values$coords
@@ -563,27 +579,37 @@ alignR_server <- function(input, output, session) {
     }
   )
 
-  observeEvent(input$save, {
-    lm_array[[cur_sp()]] <- tmp_values$coords
-    # cat(any(sapply(lm_array,is.logical)), all(sapply(lm_array,is.array)), file_name)
-    # cat(class(lm_array[[1]]), is.array(lm_array[[1]]), is.matrix(lm_array[[1]]), any(class(lm_array[[1]]) == 'array'))
-    # assign('lm_list', lm_array, envir = .GlobalEnv)
-    # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
-    # save(lm_array,file="lm_list.rda")
-    file_location <- file.path(file_dir, file_name)
-    writeLandmarks(lm_array,file_location)
-    })
+  output$quit <- downloadHandler(
+    filename = file_name,
+    content = function(file) {
+      lm_array[[cur_sp()]] <- tmp_values$coords
+      writeLandmarks(lm_array,file)
+      warnings()
+      stopApp()
+    }
+  )
 
-  observeEvent(input$quit, {
-    lm_array[[cur_sp()]] <- tmp_values$coords
-    # assign('lm_list', lm_array, envir = .GlobalEnv)
-    # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
-    # save(lm_array,file="lm_list.rda")
-    file_location <- file.path(file_dir, file_name)
-    writeLandmarks(lm_array,file_location)
-    warnings()
-    stopApp()
-  })
+  # observeEvent(input$save, {
+  #   lm_array[[cur_sp()]] <- tmp_values$coords
+  #   # cat(any(sapply(lm_array,is.logical)), all(sapply(lm_array,is.array)), file_name)
+  #   # cat(class(lm_array[[1]]), is.array(lm_array[[1]]), is.matrix(lm_array[[1]]), any(class(lm_array[[1]]) == 'array'))
+  #   # assign('lm_list', lm_array, envir = .GlobalEnv)
+  #   # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
+  #   # save(lm_array,file="lm_list.rda")
+  #   file_location <- file.path(file_dir, file_name)
+  #   writeLandmarks(lm_array,file_location)
+  #   })
+
+  # observeEvent(input$quit, {
+  #   lm_array[[cur_sp()]] <- tmp_values$coords
+  #   # assign('lm_list', lm_array, envir = .GlobalEnv)
+  #   # list2XML4R(list=list("shapes"=lm_array), file="Landmarks.txt") ##Add something to pull which kind of landmarks are being collected??
+  #   # save(lm_array,file="lm_list.rda")
+  #   file_location <- file.path(file_dir, file_name)
+  #   writeLandmarks(lm_array,file_location)
+  #   warnings()
+  #   stopApp()
+  # })
 
 
   # session$onSessionEnded(function(){
