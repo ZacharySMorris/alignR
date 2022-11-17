@@ -48,6 +48,7 @@ changeAnalysis <- function(current_tab, next_tab){
   }
 
 
+#' @export
 saveLMs <- function(lm_data,current_sp,current_lm,lm_labels,keep) {
   if (exists(names(lm_data)[current_sp],where=lm_data,mode="numeric")){
     landmarks <- lm_data[[current_sp]]
@@ -60,6 +61,7 @@ saveLMs <- function(lm_data,current_sp,current_lm,lm_labels,keep) {
   return(landmarks)
 }
 
+#' @export
 loadLMs <- function(lm_data,current_sp,lm_labels) {
   n <- length(lm_labels)
   if (exists(names(lm_data)[current_sp],where=lm_data,mode="numeric")){
@@ -70,6 +72,7 @@ loadLMs <- function(lm_data,current_sp,lm_labels) {
   return(landmarks)
 }
 
+#' @export
 checkLMs <- function(current_lm,check) {
   landmarks <- array(check, dim = c(1,3), dimnames = list(current_lm, c("X","Y","Z")))
   return(landmarks)
@@ -81,6 +84,7 @@ checkLMs <- function(current_lm,check) {
 #   }
 # }
 
+#' @export
 clearLMs <- function(lm_labels){
   n <- length(lm_labels)
   landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(lm_labels), c("X","Y","Z")))
@@ -108,6 +112,7 @@ clearLMs <- function(lm_labels){
 #   }
 # }
 
+#' @export
 next.sp <- function(x,n){
   if (x < n){
     next_spec <- x + 1
@@ -117,6 +122,7 @@ next.sp <- function(x,n){
   }
 }
 
+#' @export
 prev.sp <- function(x,n){
   if (x > 1){
     next_spec <- x - 1
@@ -126,6 +132,7 @@ prev.sp <- function(x,n){
   }
 }
 
+#' @export
 write.lms <- function (landmarks,x){
     tmp <- paste("landmarks_", x, ".csv", sep="")
     write.csv(landmarks,file=tmp) #this writes it to a csv, which will be the ultimate condition
@@ -151,6 +158,7 @@ rgl.landmarking <- function(x, temp_scene, specimen) {
   return(keep)
 }
 
+#' @export
 getmode <- function(v) {
   uniqv <- unique(v)
   uniqv[which.max(tabulate(match(v, uniqv)))]
@@ -262,6 +270,7 @@ getmode <- function(v) {
 #   return(x)
 # }
 
+#' @export
 shinyClickLine <- function(par_input, shinyBrush){
 
   tmp_proj <- par_input
@@ -274,7 +283,7 @@ shinyClickLine <- function(par_input, shinyBrush){
   return(list("clickpoint" = tmp_matrix[1,], "clickline" = win_line, "proj" = tmp_proj))
 }
 
-
+#' @export
 shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
   #centers is an array of the center points for each triangle
   #verts is an array of triangle verticies for the mesh
@@ -464,6 +473,21 @@ shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
     }
 }
 
+#' Mesh Property Manager
+#'
+#' Create a properly structured mesh object for landmarking in alignR.
+#'
+#' @details
+#' This function pre-processes the mesh files for use in alignR, including determining the file type,
+#' if the file should be centered, and checking coloring of the mesh. The output is a list with a
+#' speicmen ID, mesh object, and point size values. This function is based off of
+#' the code in digit.fixed from Geomorph 3.0.0.
+#'
+#' @param object A mesh object as output by vcgImport or a matrix of values
+#' @param size Numeric value which determines the size of vertex points for plot3d
+#' @param center A logical value of whether the specimen should be centered or not
+#'
+#' @export
 MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
   ###
   # this function is to do some pre-processing of the mesh file, including determining the file type,
@@ -506,6 +530,7 @@ MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
 
 }
 
+#' @export
 alignRPar3d <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
   rgl::rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
@@ -519,6 +544,7 @@ alignRPar3d <- function(x,zoom){
   return(tmp_par)
 }
 
+#' @export
 alignRListen <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
   rgl::rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
@@ -527,7 +553,7 @@ alignRListen <- function(x,zoom){
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
   # print(tmp_par)
-  shinyjs::showElement(id = "submitLM")
+  # shinyjs::showElement(id = "submitLM")
   # hideElement(id = "getPar")
 
   return(int)

@@ -1,6 +1,7 @@
 ### Functions for interacting with data from alignR ###
 
 # writing out alignR landmark data (built off of list2XML4R in the StereoMorph package)
+#' @export
 writeLandmarks <- function(x, file, ind=0){
   #x is a list or array of landmark data created in alignR
 
@@ -68,6 +69,7 @@ writeLandmarks <- function(x, file, ind=0){
 #
 
 # reading in alignR landmark data
+#' @export
 readLandmarks <- function(x){
   #x is the name of an alignR landmarks file
 

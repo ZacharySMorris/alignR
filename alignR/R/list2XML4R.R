@@ -1,3 +1,4 @@
+#' @export
 list2XML4R <- function(list, file="", ind=0){
 
 	## CONVERTS LIST INTO XML4R STRUCTURE
@@ -23,9 +24,9 @@ list2XML4R <- function(list, file="", ind=0){
 		}
 
 		if(class(list[[name]]) == 'logical' || class(list[[name]]) == 'character' || class(list[[name]]) == 'integer' || class(list[[name]]) == 'vector' || class(list[[name]]) == 'numeric'){
-			
+
 			names <- ifelse(is.null(names(list[[name]])), FALSE, TRUE)
-			
+
 			type <- 'vector'
 			if(class(list[[name]]) == 'logical') type <- 'logical'
 
@@ -51,7 +52,7 @@ list2XML4R <- function(list, file="", ind=0){
 		}
 
 		if(class(list[[name]]) == 'matrix'){
-		
+
 			row_names <- ifelse(is.null(rownames(list[[name]])), FALSE, TRUE)
 			col_names <- ifelse(is.null(colnames(list[[name]])), FALSE, TRUE)
 
@@ -73,16 +74,16 @@ list2XML4R <- function(list, file="", ind=0){
 		}
 
 		if(class(list[[name]]) == 'array'){
-			
+
 			# ARRAY DIMENSIONS
 			dims <- dim(list[[name]])
-			
+
 			# CONVERT TO VECTOR
 			v <- c(list[[name]])
 
 			# OPENING TAG
 			str <- c(str, paste0(paste(rep('\t', ind), collapse=''), '<', name, ' type=array dim=', paste(dims, collapse=','), ' as.numeric=', is.numeric(c(list[[name]])),' >\n'))
-			
+
 			if(length(dims) > 4) stop("listToXML4R() currently only works with arrays of 3 or 4 dimensions.")
 
 			# ARRAY VALUES

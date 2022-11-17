@@ -563,7 +563,6 @@ server <- function(input, output, session) {
                 file_load <- file.choose()
                 lm_array  <<- suppressWarnings(readLandmarks(file_load))
                 tmp_values$coords <- loadLMs(lm_array, cur_sp(), LM_values())
-
               }
         })
     }else{
