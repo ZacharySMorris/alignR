@@ -283,11 +283,26 @@ shinyClickLine <- function(par_input, shinyBrush){
   return(list("clickpoint" = tmp_matrix[1,], "clickline" = win_line, "proj" = tmp_proj))
 }
 
+#' shinySelectPoints3d
+#'
+#' This function identifies where a click on the rglwidget screen is positioned on the surface object.
+#'
+#' @details
+#' This internal function takes the mesh values, rgl parameters, and shinyBrush values for
+#' a click input and identifies the position of the click on the surface mesh. MORE DETAILS?
+#'
+#' @param centers An array of the center points for each triangle.
+#' @param verts An array of triangle vertices for the mesh.
+#' @param tris A matrix containing vertex indices of the triangles of the mesh.
+#' @param N The number of triangles.
+#' @param par_input An input from shinyGetPar3d & alignRPar3d to get the model, projection, and view for the current orientation of the mesh in the rglwidget.
+#' @param shinyBrush The ID for the shinyBrush shared from the rglwidget which contains the output of the click
+#'
 #' @export
 shinySelectPoints3d <- function(centers, verts, tris, N, par_input, shinyBrush){
   #centers is an array of the center points for each triangle
-  #verts is an array of triangle verticies for the mesh
-  #tris is a matrix containig vertex indices of the triangles of the mesh
+  #verts is an array of triangle vertices for the mesh
+  #tris is a matrix containing vertex indices of the triangles of the mesh
   #N is the number of triangles
   #par_input is an input from shinyGetPar3d to get the model, projection, and view for the current orientation of the shape in the rglwidget
   #shinyBrush contains the output of the click
@@ -530,6 +545,26 @@ MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
 
 }
 
+#' alignRPar3d
+#'
+#' An internal function for collecting the correct rgl scene values (i.e., model, projection,
+#' & viewport) prior to collecting click data to place landmarks.
+#'
+#' This is an internal function which assists the alignR application in properly updating and
+#' collecting the projection values of from rglwidget. It is called when the "get parameters"
+#' and "confirm landmark" buttons are clicked. Shiny does not provide instant access to these
+#' values, so by running shinyGetPar3d in the main app and then running this function the app
+#' is able to properly locate the position of the surface mesh in the rgl window. This is critical
+#' for identifying the position of a landmarking click on the mesh itself, which is performed
+#' by shinySelectPoints3d().
+#'
+#' @param x Must be input$par3d, the shiny relative object that contains the rgl parameters
+#' for the scene after updating via shinyGetPar3d.
+#' @param zoom The zoom of the rgl scene.
+#'
+#' @returns A list which contains parameters of the rgl scene (model, projection, & viewport)
+#'
+#' @keywords internal
 #' @export
 alignRPar3d <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d

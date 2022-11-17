@@ -1,4 +1,23 @@
 ### alignR function wrapper ###
+#' Landmark alignR
+#'
+#' Shiny application to collect 3D landmark data on surface files
+#'
+#' @details
+#' This function prepares mesh object data for landmarking and loads the landmarking application.
+#' Using a combination of rgl, Rvcg, and shiny functions, meshes are loaded into an rglwidget which can
+#' be interactively manipulated. Some compromises still exist, but this interface enables easier
+#' switching between specimens and re-landmarking, as landmarks can be placed in any order and
+#' can be loaded for later reassessment.
+#'
+#' There are three options for type of landmarking: 1. fixed / discrete landmarks, 2. a mix of discrete
+#' and surface pseudolandmarks, & 3. alignment landmarks for fitting surface pseudolandmarks. Switching
+#' between analysis type is done interactively in the open application.
+#'
+#' @param file_dir A directory containing surface files to be analyzed
+#' @param file_name A name for the landmark data file to be generated
+#' @param loadAll A logical value which determines whether all surface files should be loaded into a list or if they should be loaded only as needed for digitizing
+#'
 #' @export
 alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
   #file_dir is a file directory where surface files are located on user's computer
