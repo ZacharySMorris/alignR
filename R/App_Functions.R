@@ -1,53 +1,60 @@
 ##Functions for working within alignR's shiny environment
 
-# #function for controlling app loading screen
-# load_data <- function() {
-#   Sys.sleep(2)
-#   hide("loading_page")
-#   show("main_content")
-# }
+# changeAnalysis <- function(current_tab, next_tab){
+#   current_tab <- current_tab
+#   next_tab <- next_tab
+#
+#   shinyalert(
+#     title = "",
+#     text = "Changing analyses will delete all current landmark data. \n Do you still want to proceed?",
+#     size = "xs",
+#     closeOnEsc = FALSE,
+#     closeOnClickOutside = FALSE,
+#     html = FALSE,
+#     type = "success",
+#     showConfirmButton = TRUE,
+#     showCancelButton = TRUE,
+#     confirmButtonText = "Yes!",
+#     confirmButtonCol = "#AEDEF4",
+#     cancelButtonText = "No!",
+#     timer = 0,
+#     imageUrl = "https://fontawesome.com/icons/question-circle?style=light",
+#     animation = TRUE,
+#     callbackR = function(x) {
+#       print(x)
+#       if(x){
+#
+#         updateNumericInput(session,inputId = "n", value = 10)
+#         shinyjs::showElement(id="n")
+#         tab_n(next_tab)
+#         shinyjs::disable(paste("tab", next_tab, sep = ""))
+#         shinyjs::enable('tab2')
+#         shinyjs::enable('tab3')
+#
+#       } else{
+#         click(paste("tab", current_tab, sep = ""))
+#       }
+#     }
+#   )
+#   }
 
-###Function to add coordinates to data.frame
-
-changeAnalysis <- function(current_tab, next_tab){
-  current_tab <- current_tab
-  next_tab <- next_tab
-
-  shinyalert(
-    title = "",
-    text = "Changing analyses will delete all current landmark data. \n Do you still want to proceed?",
-    size = "xs",
-    closeOnEsc = FALSE,
-    closeOnClickOutside = FALSE,
-    html = FALSE,
-    type = "success",
-    showConfirmButton = TRUE,
-    showCancelButton = TRUE,
-    confirmButtonText = "Yes!",
-    confirmButtonCol = "#AEDEF4",
-    cancelButtonText = "No!",
-    timer = 0,
-    imageUrl = "https://fontawesome.com/icons/question-circle?style=light",
-    animation = TRUE,
-    callbackR = function(x) {
-      print(x)
-      if(x){
-
-        updateNumericInput(session,inputId = "n", value = 10)
-        shinyjs::showElement(id="n")
-        tab_n(next_tab)
-        shinyjs::disable(paste("tab", next_tab, sep = ""))
-        shinyjs::enable('tab2')
-        shinyjs::enable('tab3')
-
-      } else{
-        click(paste("tab", current_tab, sep = ""))
-      }
-    }
-  )
-  }
-
-
+#' Save Landmarks
+#'
+#' Saving or writing landmark data.
+#'
+#' @details
+#' An internal function for saving new landmarks when confirmed. Used by confirmLM() in the shiny server.
+#'
+#' @param lm_data An array of landmark data.
+#' @param current_sp The current specimen, referencing the reactive object cur_sp().
+#' @param current_lm The current landmark, referencing the reactive object current_lm().
+#' @param lm_labels The landmark labels, referencing the reactive object LM_values().
+#' @param keep The newly confirmed landmark data.
+#'
+#' @returns landmarks An array of updated landmark data.
+#'
+#' @keywords internal
+#'
 #' @export
 saveLMs <- function(lm_data,current_sp,current_lm,lm_labels,keep) {
   if (exists(names(lm_data)[current_sp],where=lm_data,mode="numeric")){
@@ -61,6 +68,22 @@ saveLMs <- function(lm_data,current_sp,current_lm,lm_labels,keep) {
   return(landmarks)
 }
 
+#' Load Landmarks
+#'
+#' Loading of landmark data.
+#'
+#' @details
+#' An internal function for loading of landmarks data. Used by various observe events in the shiny server,
+#' including changing specimens and using the load button.
+#'
+#' @param lm_data An array of landmark data.
+#' @param current_sp The current specimen, referencing the reactive object cur_sp().
+#' @param lm_labels The landmark labels, referencing the reactive object LM_values().
+#'
+#' @returns landmarks An array of loaded landmark data.
+#'
+#' @keywords internal
+#'
 #' @export
 loadLMs <- function(lm_data,current_sp,lm_labels) {
   n <- length(lm_labels)
@@ -72,22 +95,48 @@ loadLMs <- function(lm_data,current_sp,lm_labels) {
   return(landmarks)
 }
 
+#' Check Landmarks
+#'
+#' Checking of new landmark position.
+#'
+#' @details
+#' An internal function for loading the most recently submitted landmark for the user to verify.
+#' Used by submitLM() in the shiny server.
+#'
+#' @param lm_data An array of landmark data.
+#' @param current_sp The current specimen, referencing the reactive object cur_sp().
+#' @param lm_labels The landmark labels, referencing the reactive object LM_values().
+#'
+#' @returns landmarks An array of loaded landmark data.
+#'
+#' @keywords internal
+#'
 #' @export
 checkLMs <- function(current_lm,check) {
   landmarks <- array(check, dim = c(1,3), dimnames = list(current_lm, c("X","Y","Z")))
   return(landmarks)
 }
 
-# printLMs <- function() {
-#   if (exists("landmarks")) {
-#     return(landmarks)
-#   }
-# }
 
+#' Clear Landmarks
+#'
+#' Clear current landmark data for current specimen.
+#'
+#' @details
+#' An internal function for clearing the current specimen's landmark data. Used by clearLM()
+#' in the shiny server.
+#'
+#' @param lm_labels The landmark labels, referencing the reactive object LM_values().
+#'
+#' @returns landmarks An blank array of landmarks.
+#'
+#' @keywords internal
+#'
 #' @export
 clearLMs <- function(lm_labels){
   n <- length(lm_labels)
-  landmarks <<- array(NA, dim = c(n,3), dimnames = list(c(lm_labels), c("X","Y","Z")))
+  landmarks <- array(NA, dim = c(n,3), dimnames = list(c(lm_labels), c("X","Y","Z")))
+  return(landmarks)
 }
 
 
@@ -132,14 +181,6 @@ prev.sp <- function(x,n){
   }
 }
 
-#' @export
-write.lms <- function (landmarks,x){
-    tmp <- paste("landmarks_", x, ".csv", sep="")
-    write.csv(landmarks,file=tmp) #this writes it to a csv, which will be the ultimate condition
-    ##should replace with something that it saves it to a data.frame with a specimen ID
-}
-
-
 ###make a function to load in and make basic rgl window
 
 
@@ -147,22 +188,21 @@ write.lms <- function (landmarks,x){
 
 
 ##I don't remember why I made this...
-rgl.landmarking <- function(x, temp_scene, specimen) {
-  current_lm <- as.numeric(x)
+# rgl.landmarking <- function(x, temp_scene, specimen) {
+#   current_lm <- as.numeric(x)
+#
+#   LM_ids <- temp_scene[["objects"]][[1]]["id"]
+#
+#   keep <- ans <- NULL
+#   keep <- rgl::selectpoints3d(LM_ids, value = FALSE, button = "right")[2]
+#
+#   return(keep)
+# }
 
-  LM_ids <- temp_scene[["objects"]][[1]]["id"]
-
-  keep <- ans <- NULL
-  keep <- rgl::selectpoints3d(LM_ids, value = FALSE, button = "right")[2]
-
-  return(keep)
-}
-
-#' @export
-getmode <- function(v) {
-  uniqv <- unique(v)
-  uniqv[which.max(tabulate(match(v, uniqv)))]
-}
+# getmode <- function(v) {
+#   uniqv <- unique(v)
+#   uniqv[which.max(tabulate(match(v, uniqv)))]
+# }
 
 # rgl.convertLandmark3d <- function (proj, region = proj$region) {
 #   llx <- region[1]
@@ -270,18 +310,17 @@ getmode <- function(v) {
 #   return(x)
 # }
 
-#' @export
-shinyClickLine <- function(par_input, shinyBrush){
-
-  tmp_proj <- par_input
-  tmp_click <- shinyBrush$region[c(1,2)]
-  dbl_click <- c(tmp_click,tmp_click)
-  tmp_matrix <- cbind(matrix(dbl_click,ncol = 2, byrow = T), c(0,1))
-
-  win_line <- rgl::rgl.window2user(x=tmp_matrix, projection = tmp_proj)
-
-  return(list("clickpoint" = tmp_matrix[1,], "clickline" = win_line, "proj" = tmp_proj))
-}
+# shinyClickLine <- function(par_input, shinyBrush){
+#
+#   tmp_proj <- par_input
+#   tmp_click <- shinyBrush$region[c(1,2)]
+#   dbl_click <- c(tmp_click,tmp_click)
+#   tmp_matrix <- cbind(matrix(dbl_click,ncol = 2, byrow = T), c(0,1))
+#
+#   win_line <- rgl::rgl.window2user(x=tmp_matrix, projection = tmp_proj)
+#
+#   return(list("clickpoint" = tmp_matrix[1,], "clickline" = win_line, "proj" = tmp_proj))
+# }
 
 #' shinySelectPoints3d
 #'

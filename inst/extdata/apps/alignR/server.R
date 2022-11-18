@@ -102,8 +102,8 @@ server <- function(input, output, session) {
   orig_view <- NULL
 
   observeEvent(input$clear, {
-    clearLMs(LM_values())
-    tmp_values$coords <- NULL
+    # tmp_values$coords <<- clearLMs(LM_values())
+    tmp_values$coords <<- NULL
     # output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {printLMs()})
     updateSelectInput(session,"cur_specimen",selected = names(sp_list)[isolate(cur_sp())])
 
@@ -177,9 +177,6 @@ server <- function(input, output, session) {
         em(h6("Perform once all specimens have alignment landmarks")),
         align = "center",
       ),
-      # actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("cube")),
-      # actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("magic")),
-      # actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("cubes")),
       actionButton("auto_align_btn","Align Surface Landmarks!", icon = icon("object-ungroup"))
     )
   })
@@ -513,7 +510,7 @@ server <- function(input, output, session) {
   observeEvent(input$Next_LM,{
    if (current_lm() < input$n){
       next_lm <- current_lm() + 1
-      updateSelectInput(session, "Lm_n", selected = next_lm)
+      updateSelectInput(session, "Lm_n", selected = LM_values()[next_lm])
     }
     # click("goLM")
   })
@@ -521,7 +518,7 @@ server <- function(input, output, session) {
   observeEvent(input$Last_LM,{
      if (current_lm() > 1){
       next_lm <- current_lm() - 1
-      updateSelectInput(session, "Lm_n", selected = next_lm)
+      updateSelectInput(session, "Lm_n", selected = LM_values()[next_lm])
     }
     # click("goLM")
   })
