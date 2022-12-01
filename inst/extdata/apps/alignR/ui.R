@@ -72,9 +72,10 @@ ui <- shiny::fluidPage(
                  ),
                  fluidRow(
                    checkboxInput("NoWarnings", "Do not remind me to confirm landmark selections.", value = FALSE, width = NULL),
-                   align = "center",
+                   align = "center"
                  ),
                  fluidRow(
+                   sliderInput("lm_size", "Landmark Size:", min = 0.1, max = 5, 2.5, step = 0.1),
                    shinyjs::hidden(radioButtons(inputId = "SetupComplete", label = NULL, choices = c('yes','no'),selected = 'no')),
                    align = "center",
                  ),
@@ -85,7 +86,7 @@ ui <- shiny::fluidPage(
       uiOutput("cur_specimen"),
       # selectInput("cur_specimen", NULL, names(sp_list),width = "600px"), #is it ok to have the pointing to a specific named object in memory?
       verbatimTextOutput("testing", placeholder = FALSE),
-      rgl::rglwidgetOutput("SpecimenPlot", width = "600px", height = "600px"),
+      rgl::rglwidgetOutput("SpecimenPlot", width = "auto", height = "600px"),
       fluidRow(
         uiOutput("plot_3D_mousemode"),
         align = "center"

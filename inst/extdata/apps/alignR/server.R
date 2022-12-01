@@ -302,83 +302,11 @@ server <- function(input, output, session) {
     if (!is.null(tmp_values$coords)){
       if (is.matrix(tmp_values$coords)){
         rgl::rgl.spheres(tmp_values$coords[,1], tmp_values$coords[,2], tmp_values$coords[,3],
-                    radius = 2, color = c("Red"), add = TRUE) # SteelBlue
+                    radius = input$lm_size, color = c("Red"), add = TRUE) # SteelBlue
       } else{
         rgl::rgl.spheres(tmp_values$coords[1], tmp_values$coords[2], tmp_values$coords[3],
-                    radius = 2, color = c("Green"), add = TRUE) # #f1e180
+                    radius = input$lm_size, color = c("Green"), add = TRUE) # #f1e180
       }}
-
-    shinyPan3d <- local({
-      dev = rgl::cur3d()
-      subscene = rgl::currentSubscene3d(dev)
-      start <- list()
-      begin <- function(x, y) {
-      # activeSubscene <- par3d("activeSubscene", dev = dev) #get activeSubscene
-      # start$listeners <<- par3d("listeners", dev = dev, subscene = activeSubscene) #assign "listeners" to value, but it is actually just a number for the subscene?
-      # for (sub in start$listeners) {
-        init <- rgl::par3d(c("userProjection","viewport"), dev = dev, subscene = subscene) #get user projections and viewport in the subscrene in listners
-        init$pos <- c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5)
-        start[[as.character(sub)]] <<- init
-        start_int <<- init
-      # }
-          # rgl::shinyGetPar3d(c("scale","listeners","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-          # tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-          # start_int <<- alignRListen(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-          # print(start_int)
-        }
-
-      update <- function(x, y) {
-        # for (sub in start$listeners) {
-        #   init <- start[[as.character(sub)]]
-        #   xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
-        #   mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
-        #   par3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = sub )
-        # }
-        init <- start_int
-        xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
-        mouseMatrix <- rgl::translationMatrix(xlat[1], xlat[2], xlat[3])
-        shinySetPar3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = "SpecimenPlot" )
-      }
-      list(rglbegin = begin, rglupdate = update)
-    })
-
-    rglbegin <- shinyPan3d$rglbegin
-    rglupdate <- shinyPan3d$rglupdate
-
-    dev <- rgl::cur3d()
-    subscene <- rgl::currentSubscene3d(dev)
-    start <- list()
-      activeSubscene <- rgl::par3d("activeSubscene", dev = dev) #get activeSubscene
-      rgl::shinyGetPar3d(c("activeSubscene"), session)
-      start$listeners <- rgl::par3d("listeners", dev = dev) #assign "listeners" to value, but it is actually just a number for the subscene?
-
-      init <- rgl::par3d(c("userProjection","viewport"), dev = dev, subscene = subscene) #get user projections and viewport in the subscrene in listners
-      # init$pos <- c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5)
-      # start[[as.character(sub)]] <<- init
-
-      # output$testing <- renderText({
-      #   paste(dev, activeSubscene, subscene, start, init)
-      # })
-
-    # Install both
-      rgl::setUserCallbacks("right",
-                     begin = rglbegin,
-                     update = rglupdate)
-
-    # rgl::setUserCallbacks("right",
-    #                  begin = begin <- function(x, y) {
-    #                    rgl::shinyGetPar3d(c("scale","listeners","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-    #                    tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-    #                    start_int <<- alignRListen(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-    #                  },
-    #                  update =   update <- function(x, y) {
-    #                    init <- start_int
-    #                    xlat <- 2*(c(x/init$viewport[3], 1 - y/init$viewport[4], 0.5) - init$pos)
-    #                    mouseMatrix <- translationMatrix(xlat[1], xlat[2], xlat[3])
-    #                    shinySetPar3d(userProjection = mouseMatrix %*% init$userProjection, dev = dev, subscene = "SpecimenPlot" )
-    #                  }
-    # )
-
 
     rgl::rglwidget(rgl::scene3d(minimal = FALSE),
                   shared = rgl::rglShared(ids["data"]),
@@ -387,8 +315,31 @@ server <- function(input, output, session) {
 
     })
   updateRadioButtons(session, "SetupComplete", selected = 'yes')
+  # rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+  # tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+
   # pan3d(2)
   })
+
+
+  observeEvent(input$rgl_3D_brush, {
+    rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+    tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+    newProjection <- shinyPan3d(tmp_par, isolate(input$rgl_3D_brush), session)
+
+    session$sendCustomMessage("shinySetPar3d",
+                              list(subscene = newProjection$subscene,
+                                   parameter = "proj",
+                                   value = newProjection$newProjection))
+
+
+    # output$testing <- renderPrint({
+    #   move_matrix
+    # })
+
+  })
+
+
 
 
   ##landmark table output

@@ -70,4 +70,6 @@ alignR <- function(file_dir,file_name="Landmarks.txt",loadAll=TRUE){
     app_dir <- file.path(path.package("alignR"), "extdata", "apps", "alignR")
     shiny::runApp(appDir = app_dir)
     # shinyApp(alignR_ui, alignR_server)
+    # vwr <- shiny::dialogViewer('alignR', width = 1600, height = 1200)
+    # shiny::runGadget(shinyAppDir(appDir = app_dir), viewer = vwr)
 }
