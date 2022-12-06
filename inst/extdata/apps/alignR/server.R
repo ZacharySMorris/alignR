@@ -325,12 +325,12 @@ server <- function(input, output, session) {
   observeEvent(input$rgl_3D_brush, {
     rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
     tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-    newProjection <- shinyPan3d(tmp_par, isolate(input$rgl_3D_brush), session)
+    # newProjection <- shinyPan3d(tmp_par, isolate(input$rgl_3D_brush), session)
 
-    session$sendCustomMessage("shinySetPar3d",
-                              list(subscene = newProjection$subscene,
-                                   parameter = "proj",
-                                   value = newProjection$newProjection))
+    # session$sendCustomMessage("shinySetPar3d",
+                              # list(subscene = newProjection$subscene,
+                                   # parameter = "proj",
+                                   # value = newProjection$newProjection))
 
 
     # output$testing <- renderPrint({
