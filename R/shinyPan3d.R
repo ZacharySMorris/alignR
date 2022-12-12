@@ -10,7 +10,7 @@
 #' @param par_input An input from shinyGetPar3d & alignRPar3d to get the model, projection, and view for the current orientation of the mesh in the rglwidget.
 #' @param shinyBrush The ID for the shinyBrush shared from the rglwidget which contains the output of the click
 #'
-#' @export
+
 shinyPan3d <- function(par_input, shinyBrush, session){
   #par_input is an input from shinyGetPar3d to get the model, projection, and view for the current orientation of the shape in the rglwidget
   #shinyBrush contains the output of the click

@@ -312,35 +312,73 @@ server <- function(input, output, session) {
                   shared = rgl::rglShared(ids["data"]),
                   shinyBrush = "rgl_3D_brush")
 
+    js <-
+      '  window.subid = %subid%;
+
+     window.panbegin = function(x, y) {
+       var activeSub = this.getObj(subid),
+           viewport = activeSub.par3d.viewport,
+           activeModel = this.getObj(this.useid(activeSub.id, "model")),
+           l = activeModel.par3d.listeners, i;
+
+        this.userSave = {x:x, y:y, viewport:viewport,
+                            cursor:this.canvas.style.cursor};
+        for (i = 0; i < l.length; i++) {
+          activeSub = this.getObj(l[i]);
+          activeSub.userSaveMat = new CanvasMatrix4(activeSub.par3d.userMatrix);
+        }
+        this.canvas.style.cursor = "grabbing";
+     };
+
+     window.panupdate = function(x, y) {
+        var objects = this.scene.objects,
+            activeSub = this.getObj(subid),
+            activeModel = this.getObj(this.useid(activeSub.id, "model")),
+            l = activeModel.par3d.listeners,
+            viewport = this.userSave.viewport,
+            par3d, i, zoom;
+        if (x === this.userSave.x && y === this.userSave.y)
+          return;
+        x = (x - this.userSave.x)/this.canvas.width;
+        y = (y - this.userSave.y)/this.canvas.height;
+        for (i = 0; i < l.length; i++) {
+          activeSub = this.getObj(l[i]);
+          par3d = activeSub.par3d;
+          /* NB:  The right amount of zoom depends on the scaling of the data
+                  and the position of the observer.  This might
+                  need tweaking.
+          */
+          zoom = par3d.observer[2]*par3d.zoom;
+          activeSub.par3d.userMatrix.load(objects[l[i]].userSaveMat);
+          activeSub.par3d.userMatrix.translate(zoom*x, zoom*y, 0);
+        }
+        this.drawScene();
+     };
+
+     window.panend = function() {
+       this.canvas.style.cursor = this.userSave.cursor;
+     };
+     '
+
+    js <- sub("%subid%", subsceneInfo()$id, js)
+    rgl::rglwidget(setUserCallbacks("right", begin = "panbegin", update = "panupdate",
+                                         end = "panend", applyToDev = FALSE, javascript = js))
+
+    # rgl::rgl.setMouseCallbacks(3, begin = "selectingdown", update = "selectingmove",
+    #                                  end = "selectingend")
 
     })
   updateRadioButtons(session, "SetupComplete", selected = 'yes')
-  # rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-  # tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-
-  # pan3d(2)
   })
 
 
   observeEvent(input$rgl_3D_brush, {
     rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
     tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-    newProjection <- shinyPan3d(tmp_par, isolate(input$rgl_3D_brush), session)
-
-    session$sendCustomMessage("shinySetPar3d",
-                              list(subscene = newProjection$subscene,
-                                   parameter = "proj",
-                                   value = newProjection$newProjection))
-
-
     # output$testing <- renderPrint({
     #   move_matrix
     # })
-
   })
-
-
-
 
   ##landmark table output
   output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {tmp_values$coords})
@@ -371,6 +409,10 @@ server <- function(input, output, session) {
                 .options = list(positionClass = "toast-top-center", closeButton = TRUE, progressBar = FALSE)
       )
     }
+
+    # rgl::rglwidget(setUserCallbsacks("left", begin = "selectingdown", update = "selectingmove",
+    #                            end = "selectingend"))
+    # rgl::par3d(mouseMode = "selecting")
 
   })
 
