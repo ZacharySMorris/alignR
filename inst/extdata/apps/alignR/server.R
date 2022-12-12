@@ -362,7 +362,7 @@ server <- function(input, output, session) {
 
     js <- sub("%subid%", rgl::subsceneInfo()$id, js)
 
-    rgl::rglwidget(setUserCallbacks("right", begin = "panbegin", update = "panupdate",
+    rgl::rglwidget(rgl::setUserCallbacks("right", begin = "panbegin", update = "panupdate",
                                          end = "panend", applyToDev = FALSE, javascript = js))
 
     # rgl::rgl.setMouseCallbacks(3, begin = "selectingdown", update = "selectingmove",
