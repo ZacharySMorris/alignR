@@ -279,6 +279,17 @@ select {
     display: block;
 }
 
+.irs-bar {
+  background: #008442 !important;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.irs-single{
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;

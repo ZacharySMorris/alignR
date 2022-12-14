@@ -47,7 +47,7 @@ ui <- shiny::fluidPage(
                  uiOutput("Lm_n"),
                  # uiOutput("curLM"),
                  fluidRow(
-                   actionButton("getPar", "Set Position", icon = icon("sliders")),
+                   # actionButton("getPar", "Set Position", icon = icon("sliders")),
                    shinyjs::hidden(actionButton("submitLM", "Landmark!", icon = icon("crosshairs"))),
                    shinyjs::hidden(actionButton("confirmLM", "Confirm", icon = icon("circle-check"))),
                    # actionButton("auto_align","Align Surface Landmarks!", icon = icon("cube")),

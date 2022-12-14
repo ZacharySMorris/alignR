@@ -303,6 +303,16 @@ select {
     display: block;
 }
 
+.irs-bar {
+  background-color: #B04A401a !important;
+  border-color: #B04A40 !important;
+}
+
+.irs-single{
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button {
   -webkit-appearance: none;

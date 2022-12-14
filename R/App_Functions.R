@@ -612,7 +612,7 @@ alignRPar3d <- function(x,zoom){
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
   # print(tmp_par)
-  shinyjs::showElement(id = "submitLM")
+  # shinyjs::showElement(id = "submitLM")
   # hideElement(id = "getPar")
 
   return(tmp_par)

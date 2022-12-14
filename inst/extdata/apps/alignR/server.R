@@ -89,7 +89,8 @@ server <- function(input, output, session) {
     tringles = NULL,
     cur_LM  = reactive(as.numeric(input$Lm_n)),
     coords  = NULL,
-    orig_view = NULL
+    orig_view = NULL,
+    check_lm = NULL
   )
 
   tmp_specimen <- NULL
@@ -299,74 +300,69 @@ server <- function(input, output, session) {
     #                   radius = point_sizes[cur_sp()], color = c("Green"), add = TRUE) # #f1e180
     #     }}
 
-    if (!is.null(tmp_values$coords)){
-      if (is.matrix(tmp_values$coords)){
+    if (!is.null(tmp_values$coords) && is.matrix(tmp_values$coords)){
         rgl::rgl.spheres(tmp_values$coords[,1], tmp_values$coords[,2], tmp_values$coords[,3],
                     radius = input$lm_size, color = c("Red"), add = TRUE) # SteelBlue
-      } else{
-        rgl::rgl.spheres(tmp_values$coords[1], tmp_values$coords[2], tmp_values$coords[3],
+    }
+    if (!is.null(tmp_values$check_lm)){
+        rgl::rgl.spheres(tmp_values$check_lm[1], tmp_values$check_lm[2], tmp_values$check_lm[3],
                     radius = input$lm_size, color = c("Green"), add = TRUE) # #f1e180
-      }}
+    }
 
-    rgl::rglwidget(rgl::scene3d(minimal = FALSE),
-                  shared = rgl::rglShared(ids["data"]),
-                  shinyBrush = "rgl_3D_brush")
+js <-
+  '  window.subid = %subid%;
 
-    js <-
-      '  window.subid = %subid%;
+window.panbegin = function(x, y) {
+   var activeSub = this.getObj(subid),
+       viewport = activeSub.par3d.viewport,
+       activeModel = this.getObj(this.useid(activeSub.id, "model")),
+       l = activeModel.par3d.listeners, i;
 
-     window.panbegin = function(x, y) {
-       var activeSub = this.getObj(subid),
-           viewport = activeSub.par3d.viewport,
-           activeModel = this.getObj(this.useid(activeSub.id, "model")),
-           l = activeModel.par3d.listeners, i;
+    this.userSave = {x:x, y:y, viewport:viewport,
+                        cursor:this.canvas.style.cursor};
+    for (i = 0; i < l.length; i++) {
+      activeSub = this.getObj(l[i]);
+      activeSub.userSaveMat = new CanvasMatrix4(activeSub.par3d.userMatrix);
+    }
+    this.canvas.style.cursor = "grabbing";
+ };
 
-        this.userSave = {x:x, y:y, viewport:viewport,
-                            cursor:this.canvas.style.cursor};
-        for (i = 0; i < l.length; i++) {
-          activeSub = this.getObj(l[i]);
-          activeSub.userSaveMat = new CanvasMatrix4(activeSub.par3d.userMatrix);
-        }
-        this.canvas.style.cursor = "grabbing";
-     };
+ window.panupdate = function(x, y) {
+    var objects = this.scene.objects,
+        activeSub = this.getObj(subid),
+        activeModel = this.getObj(this.useid(activeSub.id, "model")),
+        l = activeModel.par3d.listeners,
+        viewport = this.userSave.viewport,
+        par3d, i, zoom;
+    if (x === this.userSave.x && y === this.userSave.y)
+      return;
+    x = (x - this.userSave.x)/this.canvas.width;
+    y = (y - this.userSave.y)/this.canvas.height;
+    for (i = 0; i < l.length; i++) {
+      activeSub = this.getObj(l[i]);
+      par3d = activeSub.par3d;
+      /* NB:  The right amount of zoom depends on the scaling of the data
+              and the position of the observer.  This might
+              need tweaking.
+      */
+      zoom = par3d.observer[2]*par3d.zoom;
+      activeSub.par3d.userMatrix.load(objects[l[i]].userSaveMat);
+      activeSub.par3d.userMatrix.translate(zoom*x, zoom*y, 0);
+    }
+    this.drawScene();
+ };
 
-     window.panupdate = function(x, y) {
-        var objects = this.scene.objects,
-            activeSub = this.getObj(subid),
-            activeModel = this.getObj(this.useid(activeSub.id, "model")),
-            l = activeModel.par3d.listeners,
-            viewport = this.userSave.viewport,
-            par3d, i, zoom;
-        if (x === this.userSave.x && y === this.userSave.y)
-          return;
-        x = (x - this.userSave.x)/this.canvas.width;
-        y = (y - this.userSave.y)/this.canvas.height;
-        for (i = 0; i < l.length; i++) {
-          activeSub = this.getObj(l[i]);
-          par3d = activeSub.par3d;
-          /* NB:  The right amount of zoom depends on the scaling of the data
-                  and the position of the observer.  This might
-                  need tweaking.
-          */
-          zoom = par3d.observer[2]*par3d.zoom;
-          activeSub.par3d.userMatrix.load(objects[l[i]].userSaveMat);
-          activeSub.par3d.userMatrix.translate(zoom*x, zoom*y, 0);
-        }
-        this.drawScene();
-     };
-
-     window.panend = function() {
-       this.canvas.style.cursor = this.userSave.cursor;
-     };
-     '
+ window.panend = function() {
+   this.canvas.style.cursor = this.userSave.cursor;
+ };
+'
 
     js <- sub("%subid%", rgl::subsceneInfo()$id, js)
 
     rgl::rglwidget(rgl::setUserCallbacks("right", begin = "panbegin", update = "panupdate",
-                                         end = "panend", applyToDev = FALSE, javascript = js))
-
-    # rgl::rgl.setMouseCallbacks(3, begin = "selectingdown", update = "selectingmove",
-    #                                  end = "selectingend")
+                                         end = "panend", applyToDev = FALSE, javascript = js),
+                   shared = rgl::rglShared(ids["data"]),
+                   shinyBrush = "rgl_3D_brush")
 
     })
   updateRadioButtons(session, "SetupComplete", selected = 'yes')
@@ -376,10 +372,61 @@ server <- function(input, output, session) {
   observeEvent(input$rgl_3D_brush, {
     rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
     tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+    shinyjs::click(id = "submitLM")
+    })
+    # repeat{
+    #   rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+    #   tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+    #
+    #   if (!any(is.nan(tmp_par$model)) && !all(tmp_par$model[,1]==0)){
+    #     # tmp_tris <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, isolate(input$rgl_3D_brush))
+    #
+    #     shinyjs::click(id = "submitLM")
+    #
+    #     # shinyjs::showElement(id = "confirmLM")
+    #
+    #     output$testing <- renderPrint({
+    #       list(tmp_par$model, !any(is.nan(tmp_par$model)) && !all(tmp_par$model[,1]==0))
+    #     })
+    #   }
+    # }
+    # rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+    # tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+    # #
     # output$testing <- renderPrint({
-    #   move_matrix
+    #   list(tmp_par$model, any(is.nan(tmp_par$model)) || all(tmp_par$model[,1]==0))
     # })
-  })
+    #
+    # if (any(is.nan(tmp_par$model)) || all(tmp_par$model[,1]==0)){
+    #   rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+    #   alignRPar3d(input$par3d,zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+    #   shinyjs::click(id = "submitLM")
+    # } else {
+
+      # tmp_tris <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, isolate(input$rgl_3D_brush))
+      # tmp_lm <- checkLMs(input$Lm_n, tmp_tris$coords)
+      # tmp_lm <- array(isolate(tmp_tris$coords), dim = c(1,3), dimnames = list(LM_values()[[as.numeric(input$Lm_n)]], c("X","Y","Z")))
+      # tmp_values$coords <<- tmp_lm
+
+
+    #   if (!isolate(input$NoWarnings)){
+    #     shinyFeedback::showToast(type = "warning",
+    #                              message = "Click confirm or select again.",
+    #                              title = "Is this landmark correctly placed?",
+    #                              keepVisible = TRUE,
+    #                              .options = list(positionClass = "toast-top-center", closeButton = TRUE, progressBar = FALSE)
+    #     )
+    #   }
+    #
+    #   shinyjs::showElement(id = "confirmLM")
+    # }
+
+    # shinyjs::showElement(id = "confirmLM")
+    #
+    # output$testing <- renderPrint({
+    #   list(tmp_par$model, any(is.nan(tmp_par$model)) || all(tmp_par$model[,1]==0), tmp_tris)
+    # })
+  # })
 
   ##landmark table output
   output$landmarks <- renderTable(rownames = TRUE, align = "c", spacing = "xs", {tmp_values$coords})
@@ -390,32 +437,27 @@ server <- function(input, output, session) {
   # rgl::addToSubscene3d(ids, subscene = rgl::currentSubscene3d())
   # rgl::delFromSubscene3d(ids, subscene = rgl::currentSubscene3d())
 
-  observeEvent(input$getPar, {
-    rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
-    tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
-
-    # output$testing <- renderText({
-    #   cat(tmp_par$model)
-    #   paste("any", any(is.nan(tmp_par$model)), "all", all(tmp_par$model[,1]==0), "both", any(is.nan(tmp_par$model)) || all(tmp_par$model[,1]==0), sep = "\n")
-    # })
-
-    # updateSelectInput("mouseMode")
-    # rgl.setMouseCallbacks()
-
-    if (!isolate(input$NoWarnings)){
-      shinyFeedback::showToast(type = "warning",
-                message = "Now that the position is set, change mouse mode to 'landmarking' and select point to be landmarked in the rgl window. Click the button AFTER identifying the point in the rgl window.",
-                title = "Where is the landmark to be placed?",
-                keepVisible = TRUE,
-                .options = list(positionClass = "toast-top-center", closeButton = TRUE, progressBar = FALSE)
-      )
-    }
-
-    # rgl::rglwidget(setUserCallbsacks("left", begin = "selectingdown", update = "selectingmove",
-    #                            end = "selectingend"))
-    # rgl::par3d(mouseMode = "selecting")
-
-  })
+  # observeEvent(input$getPar, {
+  #   rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
+  #   tmp_par <- alignRPar3d(input$par3d, zoom = ifelse(is.null(input$par3d$zoom),1,input$par3d$zoom))
+  #
+  #   # output$testing <- renderPrint({
+  #   #   input$rgl_3D_brush
+  #   # })
+  #
+  #   # updateSelectInput("mouseMode")
+  #   # rgl.setMouseCallbacks()
+  #
+  #   if (!isolate(input$NoWarnings)){
+  #     shinyFeedback::showToast(type = "warning",
+  #               message = "Now that the position is set, change mouse mode to 'landmarking' and select point to be landmarked in the rgl window. Click the button AFTER identifying the point in the rgl window.",
+  #               title = "Where is the landmark to be placed?",
+  #               keepVisible = TRUE,
+  #               .options = list(positionClass = "toast-top-center", closeButton = TRUE, progressBar = FALSE)
+  #     )
+  #   }
+  #
+  # })
 
 
   observeEvent(input$submitLM, {
@@ -426,14 +468,12 @@ server <- function(input, output, session) {
       rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
       alignRPar3d(input$par3d,zoom=input$par3d$zoom)
 
-      click(id = "submitLM")
+      shinyjs::click(id = "submitLM")
     } else {
 
     tmp_tris <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, isolate(input$rgl_3D_brush))
     tmp_lm <- checkLMs(input$Lm_n, tmp_tris$coords)
-    # tmp_lm <- array(isolate(tmp_tris$coords), dim = c(1,3), dimnames = list(LM_values()[[as.numeric(input$Lm_n)]], c("X","Y","Z")))
-    tmp_values$coords <<- tmp_lm
-
+    tmp_values$check_lm <<- tmp_lm
 
     if (!isolate(input$NoWarnings)){
       shinyFeedback::showToast(type = "warning",
@@ -445,8 +485,8 @@ server <- function(input, output, session) {
     }
 
     shinyjs::showElement(id = "confirmLM")
-    shinyjs::hideElement(id = "submitLM")
-    shinyjs::showElement(id = "getPar")
+    # shinyjs::hideElement(id = "submitLM")
+    # shinyjs::showElement(id = "getPar")
 
     }
 
@@ -455,21 +495,23 @@ server <- function(input, output, session) {
 
 ## if confirmed, save the specimen coords to landmarks and save rglwindow coords to vert list (invisible)
   observeEvent(input$confirmLM, {
-    tmp_LMs <- tmp_values$coords
+    tmp_LMs <- tmp_values$check_lm
 
     tmp_data <- saveLMs(lm_array, cur_sp(), current_lm(), LM_values(), tmp_LMs)
 
     lm_array[[cur_sp()]]  <<- tmp_data
     tmp_values$coords <- tmp_data
 
+    tmp_values$check_lm <<- NULL
+
     if (current_lm() < input$n){
       next_lm <- current_lm() + 1
       updateSelectInput(session, "Lm_n", selected = LM_values()[next_lm])
     }
 
-    shinyjs::hideElement(id = "submitLM")
+    # shinyjs::hideElement(id = "submitLM")
     shinyjs::hideElement(id = "confirmLM")
-    shinyjs::showElement(id = "getPar")
+    # shinyjs::showElement(id = "getPar")
 
   })
 
