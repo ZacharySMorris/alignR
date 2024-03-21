@@ -2,9 +2,7 @@
 
 ## Overview
 
-alignR is a package for digitizing 3D landmarks for use in geometric morphometric analyses of either discrete anatomical points (fixed_lm), 
-high density surfaces with pseudolandmarks (pseudo_lm), or a mixture of both (mixed_lm). The interface for landmarking is based on rglwidget (rgl package 
-link) and Shiny (shiny package link).
+alignR is a package for digitizing 3D landmarks for use in geometric morphometric analyses of either discrete anatomical points (fixed_lm), high density surfaces with pseudolandmarks (pseudo_lm), or a mixture of both (mixed_lm). The intrface for landmarking is based on rglwidget in [rgl] (https://cran.r-project.org/web/packages/rgl/index.html) and [Shiny] (https://cran.r-project.org/web/packages/shiny/index.html).
 
 ### Discrete Landmarks
 The discrete or fixed landmark version of alignR allows for the rapid collection of 3D datapoints which can be immediately input into functions for 
