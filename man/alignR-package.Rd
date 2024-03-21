@@ -2,7 +2,6 @@
 % Please edit documentation in R/alignR-package.R
 \docType{package}
 \name{alignR-package}
-\alias{alignR}
 \alias{alignR-package}
 \title{alignR: Landmark digitizer for alignment of surface meshes}
 \description{
