@@ -607,7 +607,7 @@ MeshManager <- function(object, color = "gray", size = 1, center = FALSE){
 #' @export
 alignRPar3d <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
-  rgl::rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
+  rgl::view3d(userMatrix = x$userMatrix, zoom = zoom)
   tmp_par <- rgl::rgl.projection()
   # tmp_par$zoom <- x$zoom
   # print("cur_par output:")
@@ -621,7 +621,7 @@ alignRPar3d <- function(x,zoom){
 #' @export
 alignRListen <- function(x,zoom){
   #x should be input$par3d which has been updated via shinyGetPar3d
-  rgl::rgl.viewpoint(userMatrix = x$userMatrix, zoom = zoom)
+  rgl::view3d(userMatrix = x$userMatrix, zoom = zoom)
   int <- rgl::rgl.projection()
   init$pos <- c(x/int$viewport[3], 1 - y/int$viewport[4], 0.5)
   # tmp_par$zoom <- x$zoom

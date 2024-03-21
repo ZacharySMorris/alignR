@@ -261,7 +261,7 @@ server <- function(input, output, session) {
 ##
 
   #need a way to reset rgl viewpoint back to default...save initial value (non-reactive?)...but then how to reset it
-  # rgl::rgl.viewpoint(tmp_values$orig_view)
+  # rgl::view3d(tmp_values$orig_view)
   # rgl::par3d(userMatrix = tmp_values$orig_view)
 
   rgl::open3d(useNULL = TRUE)
@@ -274,7 +274,7 @@ server <- function(input, output, session) {
     tmp_specimen <- MeshManager(spec)
 
     rgl::clear3d()
-    rgl::rgl.bg(color = "SlateGray")
+    rgl::bg3d(color = "SlateGray")
 
     ids <- rgl::plot3d(tmp_specimen$specimen[, 1], tmp_specimen$specimen[, 2], tmp_specimen$specimen[, 3],
                   size = tmp_specimen$ptsize, aspect = FALSE, box = FALSE, axes = FALSE,
