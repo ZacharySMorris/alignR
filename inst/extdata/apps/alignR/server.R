@@ -429,7 +429,7 @@ window.panbegin = function(x, y) {
 
     output$testing <- renderText({
       # return(cat(dimnames(centers), dimnames(verts), dimnames(spec_tri), dimnames(tmp_par), dimnames(isolate(input$rgl_3D_brush))))
-      return(list(dims(tmp_par), dimnames(tmp_par)))
+      return(list(dim(tmp_par), dimnames(tmp_par)))
       #   start_int
       #   # is.matrix(tmp_values$coords)
       # #   isolate(LM_values())
