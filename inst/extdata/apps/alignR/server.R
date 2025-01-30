@@ -428,7 +428,8 @@ window.panbegin = function(x, y) {
     tmp_par <- alignRPar3d(isolate(input$par3d),zoom=isolate(input$par3d$zoom))
 
     output$testing <- renderText({
-      return(cat(centers, verts, spec_tri, tmp_par, isolate(input$rgl_3D_brush)))
+      # return(cat(dimnames(centers), dimnames(verts), dimnames(spec_tri), dimnames(tmp_par), dimnames(isolate(input$rgl_3D_brush))))
+      return(list(dims(tmp_par), dimnames(tmp_par)))
       #   start_int
       #   # is.matrix(tmp_values$coords)
       # #   isolate(LM_values())
