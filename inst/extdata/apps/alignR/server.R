@@ -117,7 +117,7 @@ server <- function(input, output, session) {
   })
 
   output$testing <- renderText({
-    cat(centers, verts, spec_tri, N=20, tmp_par, isolate(input$rgl_3D_brush))
+    cat(centers, verts, spec_tri, tmp_par, isolate(input$rgl_3D_brush))
   #   start_int
   #   # is.matrix(tmp_values$coords)
   # #   isolate(LM_values())
