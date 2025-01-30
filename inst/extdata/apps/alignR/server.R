@@ -427,9 +427,9 @@ window.panbegin = function(x, y) {
     rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
     tmp_par <- alignRPar3d(isolate(input$par3d),zoom=isolate(input$par3d$zoom))
 
-    output$testing <- renderPrint({
+    # output$testing <- renderPrint({
       # return(cat(dimnames(centers), dimnames(verts), dimnames(spec_tri), dimnames(tmp_par), dimnames(isolate(input$rgl_3D_brush))))
-      return(list(dim(tmp_par), dimnames(tmp_par)))
+      print(list(dim = dim(tmp_par), dimnames = dimnames(tmp_par)))
       #   start_int
       #   # is.matrix(tmp_values$coords)
       # #   isolate(LM_values())
@@ -438,7 +438,7 @@ window.panbegin = function(x, y) {
       # # #   # validate(need(isolate(output$SpecimenPlot),"MeshData() not found"))
       # # #   return(cat(rv$setupComplete,!is.null(isolate(MeshData())),sep = "\n"))
       # # #
-    })
+    # })
 
     if (any(is.nan(tmp_par$model)) || all(tmp_par$model[,1]==0)){
       rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
