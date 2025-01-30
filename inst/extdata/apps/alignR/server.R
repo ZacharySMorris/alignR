@@ -427,7 +427,7 @@ window.panbegin = function(x, y) {
     rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
     tmp_par <- alignRPar3d(isolate(input$par3d),zoom=isolate(input$par3d$zoom))
 
-    output$testing <- renderText({
+    output$testing <- renderPrint({
       # return(cat(dimnames(centers), dimnames(verts), dimnames(spec_tri), dimnames(tmp_par), dimnames(isolate(input$rgl_3D_brush))))
       return(list(dim(tmp_par), dimnames(tmp_par)))
       #   start_int
