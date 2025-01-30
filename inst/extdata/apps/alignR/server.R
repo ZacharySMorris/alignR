@@ -116,20 +116,6 @@ server <- function(input, output, session) {
     #   })
   })
 
-  output$testing <- renderText({
-    cat(centers, verts, spec_tri, tmp_par, isolate(input$rgl_3D_brush))
-  #   start_int
-  #   # is.matrix(tmp_values$coords)
-  # #   isolate(LM_values())
-  # #   # return(input$SetupComplete)
-  # # #   # validate(need(MeshData(),"MeshData() not found"))
-  # # #   # validate(need(isolate(output$SpecimenPlot),"MeshData() not found"))
-  # # #   return(cat(rv$setupComplete,!is.null(isolate(MeshData())),sep = "\n"))
-  # # #
-    })
-
-
-
 # Update the landmark selection menu based on the total number of landmarks selected in Lm_n
 # observeEvent(input$tab_n, {
 #   if (as.numeric(input$tab_n)==3){
@@ -440,6 +426,18 @@ window.panbegin = function(x, y) {
   observeEvent(input$submitLM, {
     rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
     tmp_par <- alignRPar3d(isolate(input$par3d),zoom=isolate(input$par3d$zoom))
+
+    output$testing <- renderText({
+      return(cat(centers, verts, spec_tri, tmp_par, isolate(input$rgl_3D_brush)))
+      #   start_int
+      #   # is.matrix(tmp_values$coords)
+      # #   isolate(LM_values())
+      # #   # return(input$SetupComplete)
+      # # #   # validate(need(MeshData(),"MeshData() not found"))
+      # # #   # validate(need(isolate(output$SpecimenPlot),"MeshData() not found"))
+      # # #   return(cat(rv$setupComplete,!is.null(isolate(MeshData())),sep = "\n"))
+      # # #
+    })
 
     if (any(is.nan(tmp_par$model)) || all(tmp_par$model[,1]==0)){
       rgl::shinyGetPar3d(c("scale","modelMatrix","projMatrix", "viewport", "userMatrix","userProjection","mouseMode","windowRect","activeSubscene", "zoom", "observer"), session)
