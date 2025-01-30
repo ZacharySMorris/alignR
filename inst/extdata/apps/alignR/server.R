@@ -116,7 +116,8 @@ server <- function(input, output, session) {
     #   })
   })
 
-  # output$testing <- renderText({
+  output$testing <- renderText({
+    list(centers, verts, spec_tri, N=20, tmp_par, isolate(input$rgl_3D_brush))
   #   start_int
   #   # is.matrix(tmp_values$coords)
   # #   isolate(LM_values())
@@ -125,7 +126,7 @@ server <- function(input, output, session) {
   # # #   # validate(need(isolate(output$SpecimenPlot),"MeshData() not found"))
   # # #   return(cat(rv$setupComplete,!is.null(isolate(MeshData())),sep = "\n"))
   # # #
-  #   })
+    })
 
 
 
@@ -208,31 +209,7 @@ server <- function(input, output, session) {
   sp_n <<- length(sp_list)
   point_sizes <<- get('point_sizes', envir = .GlobalEnv)
 
-  # output$spec_name <- renderUI({
-  #   # output$value <- reactive({
-  #     verbatimTextOutput(
-  #       cat("The value of rv$setupComplete is:", isolate(rv$setupComplete),
-  #           "The value of !is.null(isolate(MeshData())) is:", !is.null(isolate(MeshData())),
-  #           "The value of output$setupComplete is:", isolate(output$setupComplete),
-  #           sep = "\n")
-  #     )
-    # })
-    # print(is.numeric(tmp_values$coords))
-  #   cur_sp_name <- names(sp_list)[[cur_sp()]]
-    # h4(paste(class(tmp_values$coords)), style = "padding-left:20px; color:#fff")
-    # h4(paste(cur_sp_name,cur_sp(),sep = " = sp. #"), style = "padding-left:20px; color:#fff")
-  # })
-
   output$cur_specimen <- renderUI({
-    # tags$style("
-    #     #cur_specimen ~ .selectize-input.full {
-    #         background-color: SlateGray;
-    #         border-color: SlateGray;
-    #         outline-color: SlateGray;
-    #         color: #fff;
-    #         font-size: 20px
-    #     }
-    #     ")
     selectInput("cur_specimen", NULL, names(sp_list), width = "600px")
   })
 
@@ -471,6 +448,8 @@ window.panbegin = function(x, y) {
       shinyjs::click(id = "submitLM")
     } else {
 
+      ## need to add output so I can see what "argument 4" is empty ##
+
     tmp_tris <- shinySelectPoints3d(centers, verts, spec_tri, N=20, tmp_par, isolate(input$rgl_3D_brush))
     tmp_lm <- checkLMs(input$Lm_n, tmp_tris$coords)
     tmp_values$check_lm <<- tmp_lm
@@ -485,6 +464,11 @@ window.panbegin = function(x, y) {
     }
 
     shinyjs::showElement(id = "confirmLM")
+    output$testing <- renderPrint({
+      input$rglMouse
+      output$rglMouse
+        })
+    # shinyjs::reset(id = "rglMouse", asis = FALSE)
     # shinyjs::hideElement(id = "submitLM")
     # shinyjs::showElement(id = "getPar")
 
