@@ -10,5 +10,7 @@
 #' @import Morpho
 #' @import tools
 #' @import Rvcg
+#' @import sp
+#' @import crosstalk
 ## usethis namespace: end
 NULL

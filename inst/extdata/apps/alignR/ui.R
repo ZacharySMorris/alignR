@@ -75,7 +75,7 @@ ui <- shiny::fluidPage(
                    align = "center"
                  ),
                  fluidRow(
-                   sliderInput("lm_size", "Landmark Size:", min = 0.1, max = 5, 2.5, step = 0.1),
+                   sliderInput("lm_size", "Landmark Size:", min = 0, max = 5, 2.5, step = 0.1),
                    shinyjs::hidden(radioButtons(inputId = "SetupComplete", label = NULL, choices = c('yes','no'),selected = 'no')),
                    align = "center",
                  ),
