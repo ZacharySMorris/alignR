@@ -428,7 +428,7 @@ window.panbegin = function(x, y) {
     tmp_par <- alignRPar3d(isolate(input$par3d),zoom=isolate(input$par3d$zoom))
 
     output$testing <- renderText({
-      return(cat(centers, verts, spec_tri, tmp_par))
+      return(cat(centers, verts, spec_tri, tmp_par, isolate(input$rgl_3D_brush)))
       #   start_int
       #   # is.matrix(tmp_values$coords)
       # #   isolate(LM_values())
@@ -462,10 +462,10 @@ window.panbegin = function(x, y) {
     }
 
     shinyjs::showElement(id = "confirmLM")
-    output$testing <- renderPrint({
-      input$rglMouse
-      output$rglMouse
-        })
+    # output$testing <- renderPrint({
+    #   input$rglMouse
+    #   output$rglMouse
+    #     })
     # shinyjs::reset(id = "rglMouse", asis = FALSE)
     # shinyjs::hideElement(id = "submitLM")
     # shinyjs::showElement(id = "getPar")
