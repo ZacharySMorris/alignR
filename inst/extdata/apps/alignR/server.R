@@ -449,7 +449,7 @@ window.panbegin = function(x, y) {
 
       ## need to add output so I can see what "argument 4" is empty ##
 
-    tmp_tris <- shinySelectPoints3d(tmp_par, centers, verts, spec_tri, N=20, isolate(input$rgl_3D_brush))
+    tmp_tris <- shinySelectPoints3d(isolate(input$rgl_3D_brush), centers, verts, spec_tri, N=20, tmp_par)
     tmp_lm <- checkLMs(input$Lm_n, tmp_tris$coords)
     tmp_values$check_lm <<- tmp_lm
 

@@ -338,7 +338,7 @@ prev.sp <- function(x,n){
 #' @param shinyBrush The ID for the shinyBrush shared from the rglwidget which contains the output of the click
 #'
 #' @export
-shinySelectPoints3d <- function(par_input, centers, verts, tris, N, shinyBrush){
+shinySelectPoints3d <- function(shinyBrush, centers, verts, tris, N, par_input){
   #centers is an array of the center points for each triangle
   #verts is an array of triangle vertices for the mesh
   #tris is a matrix containing vertex indices of the triangles of the mesh
